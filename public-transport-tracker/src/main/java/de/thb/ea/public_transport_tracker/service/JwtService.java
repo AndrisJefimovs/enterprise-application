@@ -70,7 +70,6 @@ public class JwtService {
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("version", user.nextRefreshVersion());
         
-        user.setRefreshStop(expiration);
         userRepository.save(user);
 
         return Jwts.builder()

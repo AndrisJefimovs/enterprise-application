@@ -42,13 +42,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Long id;
 
-    @Column(unique = true, length = 64, nullable = false)
+    @Column(unique = true, length = 63, nullable = false)
     private String username;
 
-    @Column(unique = true, length = 128, nullable = false)
+    @Column(unique = true, length = 127, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(length = 255, nullable = false)
     @Setter
     private String password;
 
@@ -73,10 +73,6 @@ public class User implements UserDetails {
     @Column(name = "refresh_version")
     private Integer refreshVersion = 0;
 
-    // the latest point where a refresh is possible (the time the last refresh token expires)
-    @Column(name = "refresh_stop")
-    private Date refreshStop;
-
     
     /**
      * This method sets and returns a new valid refresh version.
@@ -87,25 +83,6 @@ public class User implements UserDetails {
         refreshVersion += 1;
         return refreshVersion;
     }
-
-    /**
-     * Update the refreshStop if the new refreshStop is later then the old one.
-     * 
-     * This setter ensures that the refreshStop is always the time when all refresh tokens are
-     * expired.
-     * 
-     * @param refreshStop The expiration time of a refresh token.
-     * @throws IllegalArgumentException If the argument is null.
-     */
-    public void setRefreshStop(Date refreshStop) throws IllegalArgumentException {
-        if (refreshStop == null)
-            throw new IllegalArgumentException("refreshStop must not be null");
-
-        if (this.refreshStop == null || this.refreshStop.before(refreshStop)) {
-            this.refreshStop = refreshStop;
-        }
-    }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
