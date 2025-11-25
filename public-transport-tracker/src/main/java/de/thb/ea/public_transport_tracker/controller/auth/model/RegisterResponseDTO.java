@@ -12,7 +12,7 @@ public class RegisterResponseDTO {
 
     public static RegisterResponseDTO success() {
         return RegisterResponseDTO.builder()
-                .statusCode(StatusCode.SUCCESS)
+                .statusCode(StatusCode.SUCCESS.index())
                 .statusMessage("New user is registered.")
                 .build();
     }
@@ -20,7 +20,7 @@ public class RegisterResponseDTO {
 
     public static RegisterResponseDTO usernameAlreadyTaken() {
         return RegisterResponseDTO.builder()
-                .statusCode(StatusCode.USERNAME_ALREADY_TAKEN)
+                .statusCode(StatusCode.USERNAME_ALREADY_TAKEN.index())
                 .statusMessage("The username is already taken.")
                 .build();
     }
@@ -28,7 +28,7 @@ public class RegisterResponseDTO {
 
     public static RegisterResponseDTO emailAlreadyTaken() {
         return RegisterResponseDTO.builder()
-                .statusCode(StatusCode.EMAIL_ALREADY_TAKEN)
+                .statusCode(StatusCode.EMAIL_ALREADY_TAKEN.index())
                 .statusMessage("The email is already taken.")
                 .build();
     }

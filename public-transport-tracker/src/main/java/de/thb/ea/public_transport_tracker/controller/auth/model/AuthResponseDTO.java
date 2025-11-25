@@ -19,21 +19,21 @@ public class AuthResponseDTO {
         return AuthResponseDTO.builder()
                 .token(authToken)
                 .refreshToken(refreshToken)
-                .statusCode(StatusCode.SUCCESS)
+                .statusCode(StatusCode.SUCCESS.index())
                 .statusMessage("Successfully logged in.")
                 .build();
     }
 
     public static AuthResponseDTO userNotFound() {
         return AuthResponseDTO.builder()
-                .statusCode(StatusCode.USER_NOT_FOUND)
+                .statusCode(StatusCode.USER_NOT_FOUND.index())
                 .statusMessage("User not found.")
                 .build();
     }
 
     public static AuthResponseDTO invalidCredentials() {
         return AuthResponseDTO.builder()
-                .statusCode(StatusCode.INVALID_CREDENTIALS)
+                .statusCode(StatusCode.INVALID_CREDENTIALS.index())
                 .statusMessage("Invalid credentials.")
                 .build();
     }
