@@ -66,9 +66,9 @@ public class AuthController {
 
         User user;
         if (request.getIdentifierType().equals("username"))
-            user = userService.loadUserByUsername(request.getIdentifier());
+            user = userService.getUserByUsername(request.getIdentifier());
         else if (request.getIdentifierType().equals("email"))
-            user = userService.loadUserByEmail(request.getIdentifier());
+            user = userService.getUserByEmail(request.getIdentifier());
         else
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
@@ -97,7 +97,7 @@ public class AuthController {
         if (request.getRefreshToken() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        User user = userService.loadUserByUsername(
+        User user = userService.getUserByUsername(
             jwtService.extractUsername(request.getRefreshToken())
         );
 

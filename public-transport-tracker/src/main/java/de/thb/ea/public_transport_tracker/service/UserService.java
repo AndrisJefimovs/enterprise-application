@@ -25,7 +25,7 @@ public class UserService {
      * @return user
      * @throws UsernameNotFoundException If no user with spedified username found.
      */
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User getUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
 
         if (user.isEmpty()) {
@@ -42,7 +42,7 @@ public class UserService {
      * @return user
      * @throws UsernameNotFoundException If no user with specified email address found.
      */
-    public User loadUserByEmail(String email) throws UsernameNotFoundException {
+    public User getUserByEmail(String email) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isEmpty()) {
