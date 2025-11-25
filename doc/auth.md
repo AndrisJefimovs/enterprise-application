@@ -54,7 +54,7 @@ If there is a problem with the `LoginRequest` like missing fields then the serve
 curl http://example.com/auth/login \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"identifier": "user", "identifierType": "email", "password": "pass123"}'
+    -d '{"identifier": "user", "identifierType": "username", "password": "pass123"}'
 ```
 
 **Example Response**
