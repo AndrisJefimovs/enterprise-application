@@ -1,0 +1,16 @@
+{
+    "properties": [
+        {
+            "name": "security.jwt.secret-key",
+            "description": "The secret key used to generate the JWT autentication tokens."
+        },
+        {
+            "name": "security.jwt.expiration-time",
+            "description": "The expiration time for a JWT authentication token in milliseconds."
+        },
+        {
+            "name": "security.jwt.refresh-expiration-time",
+            "description": "The espiration time for a JWT refresh token in milliseconds."
+        }
+    ]
+}
