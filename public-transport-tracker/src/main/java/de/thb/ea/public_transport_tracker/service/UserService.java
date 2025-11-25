@@ -59,6 +59,7 @@ public class UserService {
      * @return Ok.
      */
     public Boolean addNewUser(User user) {
+        user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
             userRepository.save(user);

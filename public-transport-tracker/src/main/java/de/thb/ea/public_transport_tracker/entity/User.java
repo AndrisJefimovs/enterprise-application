@@ -84,6 +84,16 @@ public class User implements UserDetails {
         return refreshVersion;
     }
 
+
+    /**
+     * This method can be used to ensure a that the user object has no id. This way a new id is
+     * generated when saving it to the database
+     */
+    public void forgetId() {
+        id = null;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles
