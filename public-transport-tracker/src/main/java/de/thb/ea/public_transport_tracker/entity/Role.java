@@ -1,6 +1,5 @@
 package de.thb.ea.public_transport_tracker.entity;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -14,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder.Default;
 
 
 @Builder

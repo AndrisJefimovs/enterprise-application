@@ -1,10 +1,7 @@
 package de.thb.ea.public_transport_tracker.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
-import de.thb.ea.public_transport_tracker.repository.RoleRepository;
 import de.thb.ea.public_transport_tracker.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
