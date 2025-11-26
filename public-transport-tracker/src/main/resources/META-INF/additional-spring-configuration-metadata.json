@@ -11,6 +11,14 @@
         {
             "name": "security.jwt.refresh-expiration-time",
             "description": "The espiration time for a JWT refresh token in milliseconds."
+        },
+        {
+            "name": "application.users.admin.username",
+            "description": "The default admin username. Will be created if no admin in repository."
+        },
+        {
+            "name": "application.users.admin.password",
+            "description": "The password for default admin user."
         }
     ]
 }

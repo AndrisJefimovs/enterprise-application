@@ -52,14 +52,13 @@ public class User implements UserDetails {
     @Setter
     private String password;
 
-    @Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -87,7 +86,7 @@ public class User implements UserDetails {
 
     /**
      * This method can be used to ensure a that the user object has no id. This way a new id is
-     * generated when saving it to the database
+     * generated when saving it to the database.
      */
     public void forgetId() {
         id = null;

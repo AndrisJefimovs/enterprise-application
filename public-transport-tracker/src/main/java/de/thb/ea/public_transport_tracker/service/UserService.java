@@ -1,12 +1,18 @@
 package de.thb.ea.public_transport_tracker.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
+import de.thb.ea.public_transport_tracker.repository.RoleRepository;
 import de.thb.ea.public_transport_tracker.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
@@ -17,6 +23,7 @@ public class UserService {
     
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
+    private RoleService roleService;
 
 
     /**
@@ -52,8 +59,29 @@ public class UserService {
         return user.get();
     }
 
+
     /**
-     * This function tries to add an user to the database.
+     * This method returns a list of users that have a specified role.
+     * 
+     * @param roleName
+     * @return List of users. If no role with given name exists an empty list is returned.
+     */
+    public List<User> getUsersByRole(String roleName) {
+        return userRepository.findByRoles_Name(roleName);
+    }
+
+    /**
+     * Get a list of users that have the given role.
+     * 
+     * @param role
+     * @return List of users.
+     */
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findByRoles(role);
+    } 
+
+    /**
+     * This function tries to add an user to the database. It also tries to create the roles.
      * 
      * @param user The user that should be added to the database (must not be null).
      * @return Ok.
@@ -62,6 +90,10 @@ public class UserService {
         user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
+            for (Role role : user.getRoles()) {
+                // dont't care if it worked
+                roleService.addNewRole(role);
+            }
             userRepository.save(user);
         }
         catch (Exception e) {
