@@ -30,7 +30,7 @@ public class AuthController {
     private JwtService jwtService;
     private AuthenticationManager authenticationManager;
 
-
+    
     @PostMapping("/register")
     public RegisterResponseDTO postMethodName(@RequestBody RegisterRequestDTO request) {
         if (request.getEmail() == null ||
@@ -82,11 +82,16 @@ public class AuthController {
             )
         );
 
-        if (authentication.isAuthenticated())
-            return AuthResponseDTO.success(
-                jwtService.generateToken(user),
-                jwtService.generateRefreshToken(user)
-            );
+        if (authentication.isAuthenticated()) {
+            String token = jwtService.generateToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            if (token == null || refreshToken == null)
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return AuthResponseDTO.success(token, refreshToken);
+        }
+            
         
         return AuthResponseDTO.invalidCredentials();
     }
@@ -104,11 +109,15 @@ public class AuthController {
         if (user == null)
             return AuthResponseDTO.userNotFound();
 
-        if (jwtService.validateRefreshToken(request.getRefreshToken(), user))
-            return AuthResponseDTO.success(
-                jwtService.generateToken(user),
-                jwtService.generateRefreshToken(user)
-            );
+        if (jwtService.validateRefreshToken(request.getRefreshToken(), user)) {
+            String token = jwtService.generateToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            if (token == null || refreshToken == null)
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return AuthResponseDTO.success(token, refreshToken);
+        }
         
         return AuthResponseDTO.invalidCredentials();
     }

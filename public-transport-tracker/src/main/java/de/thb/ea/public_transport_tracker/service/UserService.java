@@ -3,6 +3,8 @@ package de.thb.ea.public_transport_tracker.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,17 +12,22 @@ import org.springframework.stereotype.Service;
 import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.repository.UserRepository;
-import lombok.AllArgsConstructor;
 
 
 @Service
-@AllArgsConstructor
 public class UserService {
     
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private RoleService roleService;
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
+        this.userRepository = userRepository;
+        this. passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+    }
 
     /**
      * Ths function returns the user with the specified username.
@@ -86,11 +93,34 @@ public class UserService {
         user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
+            // TODO: add parameter to disable role creation
             for (Role role : user.getRoles()) {
                 // dont't care if it worked
+                // if it does not work the role probably already exists 
                 roleService.addNewRole(role);
             }
             userRepository.save(user);
+        }
+        catch (Exception e) {
+            logger.info(String.format("Failed to create new user '%s'", user.getUsername()));
+            logger.debug(e.toString());
+            return false;
+        }
+        logger.info(String.format("Successfully created new user '%s' with id %d",
+                                    user.getUsername(), user.getId()));
+        return true;
+    }
+
+    /**
+     * Tries to update a user if it exists.
+     * 
+     * @param user
+     * @return true if user was successfully updated; oterwise false
+     */
+    public Boolean updateUser(User user) {
+        try {
+            if (userIdExists(user.getId()))
+                userRepository.save(user);
         }
         catch (Exception e) {
             return false;
@@ -109,9 +139,27 @@ public class UserService {
             userRepository.delete(user);
         }
         catch (Exception e) {
+            logger.info(String.format("Failed to delete user '%s' with id %d", user.getUsername(),
+                                        user.getId()));
+            logger.debug(e.toString());
             return false;
         }
+        logger.info(String.format("Deleted user '%s' with id %d", user.getUsername(),
+                                    user.getId()));
         return true;
+    }
+
+    /**
+     * Checks if a user with given id exists in repository.
+     * 
+     * @param userId
+     * @return true if user exists; otherwise false
+     * @throws IllegalArgumentException if userId is null.
+     */
+    public Boolean userIdExists(Long userId) throws IllegalArgumentException {
+        if (userId == null)
+            throw new IllegalArgumentException("User Id must not be null");
+        return userRepository.findById(userId).isPresent();
     }
 
     /**

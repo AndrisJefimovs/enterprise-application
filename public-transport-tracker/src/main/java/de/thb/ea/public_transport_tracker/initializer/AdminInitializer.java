@@ -18,18 +18,18 @@ import de.thb.ea.public_transport_tracker.service.UserService;
 
 @Component
 public class AdminInitializer implements ApplicationRunner {
+
+    private final Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
     
-    private final UserService userService;
-
-    private Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
-
     @Value("${application.users.admin.username}")
     private String adminUsername;
 
     @Value("${application.users.admin.password}")
     private String adminPassword;
 
-    
+    private final UserService userService;
+
+
     public AdminInitializer(UserService userService) {
         this.userService = userService;
     }
@@ -70,8 +70,11 @@ public class AdminInitializer implements ApplicationRunner {
 
             if (ok)
                 logger.info("Default Admin account created");
-            else
+            else {
                 logger.warn("Failed to create default Admin account");
+                logger.info("You probably have to install the first admin account manually by" +
+                            " accessing the database.");
+            }
         }
         else
             logger.info("No default Admin account needed");

@@ -5,12 +5,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.User;
-import de.thb.ea.public_transport_tracker.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,6 +21,8 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
+
+    private final Logger logger = LoggerFactory.getLogger(JwtService.class);
     
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -30,11 +33,10 @@ public class JwtService {
     @Value("${security.jwt.refresh-expiration-time}")
     private Long jwtRefreshExpiration;
 
+    private UserService userService;
 
-    private UserRepository userRepository;
-
-    public JwtService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public JwtService(UserService userService) {
+        this.userService = userService;
     }
 
 
@@ -61,16 +63,20 @@ public class JwtService {
      * This function generates a refresh token for an user.
      * 
      * @param user The user to generate the token for.
-     * @return The refresh token for the user.
+     * @return The refresh token for the user. If something went wrong it returns null.
      */
-    public String generateRefreshToken(User user) { 
+    public String generateRefreshToken(User user) {
         final Date now = new Date();
         final Date expiration = new Date(now.getTime() + jwtRefreshExpiration);
 
         HashMap<String, Object> claims = new HashMap<>();
-        claims.put("version", user.nextRefreshVersion());
+        claims.put("version", user.nextRefreshVersion()); // also updates refresh version
         
-        userRepository.save(user);
+        if (!userService.updateUser(user)) {
+            logger.warn(String.format("Failed to update user (id: %d) with new refresh token.",
+                                        user.getId()));
+            return null;
+        }
 
         return Jwts.builder()
                 .setClaims(claims)
