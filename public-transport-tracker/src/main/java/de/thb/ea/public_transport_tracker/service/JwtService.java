@@ -33,10 +33,10 @@ public class JwtService {
     @Value("${security.jwt.refresh-expiration-time}")
     private Long jwtRefreshExpiration;
 
-    private UserService userService;
+    private UserInfoService userInfoService;
 
-    public JwtService(UserService userService) {
-        this.userService = userService;
+    public JwtService(UserInfoService userInfoService) {
+        this.userInfoService = userInfoService;
     }
 
 
@@ -71,8 +71,8 @@ public class JwtService {
 
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("version", user.nextRefreshVersion()); // also updates refresh version
-        
-        if (!userService.updateUser(user)) {
+
+        if (!userInfoService.updateUser(user)) {
             logger.warn(String.format("Failed to update user (id: %d) with new refresh token.",
                                         user.getId()));
             return null;

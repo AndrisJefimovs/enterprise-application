@@ -30,5 +30,35 @@ public class UserInfoService implements UserDetailsService {
             throw new UsernameNotFoundException("No user with username '" + username + "' found.");
         return user.get();
     }
+
+    /**
+     * Tries to update a user if it exists.
+     * 
+     * @param user
+     * @return true if user was successfully updated; oterwise false
+     */
+    public Boolean updateUser(User user) {
+        try {
+            if (userIdExists(user.getId()))
+                userRepository.save(user);
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if a user with given id exists in repository.
+     * 
+     * @param userId
+     * @return true if user exists; otherwise false
+     * @throws IllegalArgumentException if userId is null.
+     */
+    public Boolean userIdExists(Long userId) throws IllegalArgumentException {
+        if (userId == null)
+            throw new IllegalArgumentException("User Id must not be null");
+        return userRepository.findById(userId).isPresent();
+    }
     
 }
