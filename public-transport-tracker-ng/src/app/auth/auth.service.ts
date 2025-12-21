@@ -6,7 +6,7 @@ import { Observable, tap } from 'rxjs';
 import { TokenService } from '../core/token.service';
 
 @Injectable({
-    providedIn: 'root',
+    providedIn: 'root'
 })
 export class AuthService {
   

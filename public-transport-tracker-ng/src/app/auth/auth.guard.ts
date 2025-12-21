@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { TokenService } from '../core/token.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+    providedIn: 'root'
+})
 export class AuthGuard implements CanActivate {
 
     constructor(
