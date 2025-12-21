@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import de.thb.ea.public_transport_tracker.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,33 +37,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // cut of "Bearer "-prefix
-            username = jwtService.extractUsername(token);
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                    );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7); // cut of "Bearer "-prefix
+                username = jwtService.extractUsername(token);
             }
-        }
-        filterChain.doFilter(request, response);
-    }
 
-    /**
-     * This function is needed in case the client tries to use the /auth api while still sending
-     * an invalid auth token.
-     */
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return request.getServletPath().startsWith("/auth");
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtService.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                        );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+            filterChain.doFilter(request, response);
+        }
+        catch (ExpiredJwtException ex) {
+            // 🔥 DAS ist der Fix
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
+        
     }
 }
