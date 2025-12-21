@@ -39,6 +39,7 @@ public class AdminInitializer implements ApplicationRunner {
         List<User> adminUsers = userService.getUsersByRole("ROLE_ADMIN");
 
         if (adminUsers.isEmpty()) {
+            // get cli args
             List<String> usernames = args.getOptionValues("admin-username");
             List<String> passwords = args.getOptionValues("admin-password");
 
@@ -58,8 +59,9 @@ public class AdminInitializer implements ApplicationRunner {
 
             Set<Role> roles = new HashSet<>();
             roles.add(Role.builder().name("ROLE_ADMIN").build());
+            roles.add(Role.builder().name("ROLE_USER").build());
 
-            Boolean ok = userService.addNewUser(
+            Boolean ok = userService.addNewUserWithRoles(
                 User.builder()
                     .username(adminUsername)
                     .email("")
@@ -77,6 +79,6 @@ public class AdminInitializer implements ApplicationRunner {
             }
         }
         else
-            logger.info("No default Admin account needed");
+            logger.info("No default admin account needed; there is already an admin account.");
     }
 }

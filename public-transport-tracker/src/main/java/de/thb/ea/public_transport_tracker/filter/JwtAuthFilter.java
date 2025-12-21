@@ -56,4 +56,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    /**
+     * This function is needed in case the client tries to use the /auth api while still sending
+     * an invalid auth token.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return request.getServletPath().startsWith("/auth");
+    }
 }

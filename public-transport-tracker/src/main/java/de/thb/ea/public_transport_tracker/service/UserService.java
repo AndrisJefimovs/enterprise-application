@@ -1,7 +1,9 @@
 package de.thb.ea.public_transport_tracker.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,21 +86,80 @@ public class UserService {
     } 
 
     /**
-     * This function tries to add an user to the database. It also tries to create the roles.
+     * This function tries to add an user to the database. It also creates the roles.
      * 
      * @param user The user that should be added to the database (must not be null).
      * @return Ok.
+     * @throws IllegalArgumentException if user is null.
      */
-    public Boolean addNewUser(User user) {
+    public Boolean addNewUserWithRoles(User user) throws IllegalArgumentException {
+        if (user == null)
+            throw new IllegalArgumentException("user must not be null");
+
+        user.forgetId(); // prevent updating existing users
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // create not existing roles
+        Set<Role> newRoles = new HashSet<>();
+
+        for (Role role : user.getRoles()) {
+            Role r = roleService.getRoleByName(role.getName());
+            if (r == null) {
+                if (!roleService.addNewRole(role)) {
+                    logger.warn(String.format("User '%s' was not created because the role '%s'"+
+                                " could not be created", user.getUsername(), role.getName()));
+                    return false;
+                }
+                else {
+                    newRoles.add(role);
+                }
+            }
+            else {
+                newRoles.add(r);
+            }
+        }
+        user.setRoles(newRoles);
+
+        try {
+            userRepository.save(user);
+        }
+        catch (Exception e) {
+            logger.warn(String.format("Failed to create new user '%s'", user.getUsername()));
+            logger.debug(e.toString());
+            return false;
+        }
+        logger.info(String.format("Successfully created new user '%s' with id %d",
+                                    user.getUsername(), user.getId()));
+        return true;
+    }
+
+    /**
+     * This function tries to add an user to the database.
+     * 
+     * @param user The user that should be added to the database (must not be null).
+     * @return Ok.
+     * @throws IllegalArgumentException if user is null.
+     */
+    public Boolean addNewUser(User user) throws IllegalArgumentException {
+        if (user == null)
+            throw new IllegalArgumentException("user must not be null");
+
+        Set<Role> newRoles = new HashSet<>();
+
+        for (Role role : user.getRoles()) {
+            Role r = roleService.getRoleByName(role.getName());
+            if (r == null) {
+                logger.warn(String.format("Failed to add user '%s' because role '%s' does not" +
+                            " exist", user.getUsername(), role.getName()));
+                return false;
+            }
+            newRoles.add(r);
+        }
+        user.setRoles(newRoles);
+
         user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
-            // TODO: add parameter to disable role creation
-            for (Role role : user.getRoles()) {
-                // dont't care if it worked
-                // if it does not work the role probably already exists 
-                roleService.addNewRole(role);
-            }
             userRepository.save(user);
         }
         catch (Exception e) {

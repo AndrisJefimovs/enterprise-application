@@ -1,12 +1,17 @@
 package de.thb.ea.public_transport_tracker.controller.auth;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,12 +20,17 @@ import de.thb.ea.public_transport_tracker.controller.auth.model.LoginRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RefreshRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterResponseDTO;
+import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
 import de.thb.ea.public_transport_tracker.service.UserService;
 import lombok.AllArgsConstructor;
 
-
+@CrossOrigin(
+    origins = "http://localhost:4200",
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
@@ -44,10 +54,13 @@ public class AuthController {
         if (userService.emailExists(request.getEmail()))
             return RegisterResponseDTO.emailAlreadyTaken();
 
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().name("ROLE_USER").build());
         User user = User.builder()
                         .username(request.getUsername())
                         .email(request.getEmail())
                         .password(request.getPassword())
+                        .roles(roles)
                         .build();
 
         if (userService.addNewUser(user))
