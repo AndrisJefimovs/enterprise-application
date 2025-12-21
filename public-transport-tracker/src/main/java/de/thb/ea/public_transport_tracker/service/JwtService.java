@@ -69,14 +69,18 @@ public class JwtService {
         final Date now = new Date();
         final Date expiration = new Date(now.getTime() + jwtRefreshExpiration);
 
-        HashMap<String, Object> claims = new HashMap<>();
-        claims.put("version", user.nextRefreshVersion()); // also updates refresh version
-
-        if (!userInfoService.updateUser(user)) {
-            logger.warn(String.format("Failed to update user (id: %d) with new refresh token.",
+        Integer refreshVersion;
+        try {
+            refreshVersion = userInfoService.nextRefreshVersion(user);
+        }
+        catch (Exception e) {
+            logger.warn(String.format("Failed to update user (id: %d) with new refresh version.",
                                         user.getId()));
             return null;
         }
+
+        HashMap<String, Object> claims = new HashMap<>();
+        claims.put("version", refreshVersion);
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -61,4 +61,18 @@ public class UserInfoService implements UserDetailsService {
         return userRepository.findById(userId).isPresent();
     }
     
+
+    /**
+     * This method updates and returns a new valid refresh version number of an user.
+     * 
+     * @param user
+     * @return New refresh version
+     * @throws Exception if something went wrong (probably the user could not be updated in DB)
+     */
+    public Integer nextRefreshVersion(User user) throws Exception {
+        user.setRefreshVersion(user.getRefreshVersion() + 1);
+        if (!updateUser(user))
+            throw new Exception("Failed to update user in database");
+        return user.getRefreshVersion();
+    }
 }

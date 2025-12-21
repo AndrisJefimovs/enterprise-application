@@ -2,6 +2,7 @@ package de.thb.ea.public_transport_tracker.entity;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,8 @@ public class User implements UserDetails {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     @Setter
-    private Set<Role> roles;
+    @Default
+    private Set<Role> roles = new HashSet<>();
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -70,18 +72,8 @@ public class User implements UserDetails {
 
     @Default
     @Column(name = "refresh_version")
+    @Setter
     private Integer refreshVersion = 0;
-
-    
-    /**
-     * This method sets and returns a new valid refresh version.
-     * 
-     * @return New refresh version
-     */
-    public Integer nextRefreshVersion() {
-        refreshVersion += 1;
-        return refreshVersion;
-    }
 
 
     /**
