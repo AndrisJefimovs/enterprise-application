@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LoginRequest, RegisterRequest } from './model/request';
-import { AuthResponse, RegisterResponse } from './model/response';
+import { ILoginRequest, IRegisterRequest } from './model/request';
+import { IAuthResponse, IRegisterResponse } from './model/response';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from '../core/token.service';
 
@@ -17,8 +17,8 @@ export class AuthService {
         private tokenService: TokenService
     ) {}
 
-    login(req: LoginRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.API}/login`, req)
+    login(req: ILoginRequest): Observable<IAuthResponse> {
+        return this.http.post<IAuthResponse>(`${this.API}/login`, req)
             .pipe(
                 tap(res => {
                     if (res.statusCode === 0) {
@@ -28,12 +28,12 @@ export class AuthService {
             );
     }
 
-    register(req: RegisterRequest): Observable<RegisterResponse> {
-        return this.http.post<RegisterResponse>(`${this.API}/register`, req);
+    register(req: IRegisterRequest): Observable<IRegisterResponse> {
+        return this.http.post<IRegisterResponse>(`${this.API}/register`, req);
     }
 
-    refreshToken(): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.API}/refresh`, {
+    refreshToken(): Observable<IAuthResponse> {
+        return this.http.post<IAuthResponse>(`${this.API}/refresh`, {
             refreshToken: this.tokenService.getRefreshToken()
         });
     }

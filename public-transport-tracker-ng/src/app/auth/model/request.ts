@@ -4,12 +4,12 @@ export interface RegisterRequest {
     password: string;
 }
 
-export interface LoginRequest {
+export interface ILoginRequest {
     identifier: string;
     identifierType: 'username' | 'email';
     password: string;
 }
 
-export interface RefreshRequest {
+export interface IRefreshRequest {
     refreshToken: string;
 }
