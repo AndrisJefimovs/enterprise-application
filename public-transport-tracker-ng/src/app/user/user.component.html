@@ -1,0 +1,26 @@
+<h2>List of Users</h2>
+
+<table>
+    <tr>
+        <th>id</th>
+        <th>username</th>
+        <th>email</th>
+        <th>password</th>
+        <th>roleIds</th>
+        <th>createdAt</th>
+        <th>updatedAt</th>
+        <th>refreshVersion</th>
+    </tr>
+    @for (user of users; track user.id) {
+        <tr>
+            <td>{{user.id}}</td>
+            <td>{{user.username}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.password}}</td>
+            <td>{{user.roleIds}}</td>
+            <td>{{user.createdAt}}</td>
+            <td>{{user.updatedAt}}</td>
+            <td>{{user.refreshVersion}}</td>
+        </tr>
+    }
+</table> 
