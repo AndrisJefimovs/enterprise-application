@@ -32,6 +32,28 @@ public class UserService {
     }
 
     /**
+     * Get all users.
+     * @return list of all users.
+     */
+    public List<User> getAllUsers() {
+        return (List<User>) userRepository.findAll();
+    }
+
+    /**
+     * Get user by id.
+     * @param id User id.
+     * @return user or null if no user with this id exists.
+     */
+    public User getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isPresent())
+            return user.get();
+        
+        return null;
+    }
+
+    /**
      * Ths function returns the user with the specified username.
      * @param username Username of the user (must not be null).
      * @return user

@@ -32,7 +32,7 @@ import lombok.AllArgsConstructor;
     methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
 )
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/")
 @AllArgsConstructor
 public class AuthController {
 
@@ -41,7 +41,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     
-    @PostMapping("/register")
+    @PostMapping("register")
     public RegisterResponseDTO postMethodName(@RequestBody RegisterRequestDTO request) {
         if (request.getEmail() == null ||
             request.getUsername() == null ||
@@ -70,7 +70,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public AuthResponseDTO authenticateUser(@RequestBody LoginRequestDTO request) {
         if (request.getIdentifier() == null ||
             request.getIdentifierType() == null ||
@@ -110,7 +110,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/refresh")
+    @PostMapping("refresh")
     public AuthResponseDTO reauthenticateUser(@RequestBody RefreshRequestDTO request) {
         if (request.getRefreshToken() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

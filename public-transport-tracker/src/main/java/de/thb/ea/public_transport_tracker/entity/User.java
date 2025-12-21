@@ -85,6 +85,30 @@ public class User implements UserDetails {
     }
 
 
+    /**
+     * Check if user has a specific role.
+     * @param role
+     * @return true if it has the role; otherwise false.
+     */
+    public Boolean hasRole(Role role) {
+        return roles.contains(role);
+    }
+
+
+    /**
+     * Check if user has a role with specified rolename.
+     * @param roleName
+     * @return true if user has role; otherwise false.
+     */
+    public Boolean hasRole(String roleName) {
+        for (Role role : roles) {
+            if (role.getName().equals(roleName))
+                return true;
+        }
+        return false;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles

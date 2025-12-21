@@ -37,9 +37,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // public endpoints
                 .requestMatchers("/auth/**").permitAll()
-                
-                // role based endpoints
-                .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
 
                 // all other requests require authentication
                 .anyRequest().authenticated()
