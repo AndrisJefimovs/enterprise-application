@@ -1,0 +1,31 @@
+<h2>Registrieren</h2>
+
+<form [formGroup]="form" (ngSubmit)="register()">
+  <input
+    type="text"
+    formControlName="username"
+    placeholder="Username"
+  />
+
+  <input
+    type="email"
+    formControlName="email"
+    placeholder="Email"
+  />
+
+  <input
+    type="password"
+    formControlName="password"
+    placeholder="Passwort"
+  />
+
+  <button type="submit" [disabled]="loading">
+    {{ loading ? 'Bitte warten…' : 'Registrieren' }}
+  </button>
+
+  @if (error) {
+    <p style="color:red">{{ error }}</p>
+  }
+</form>
+
+<a routerLink="/login">Zurück zum Login</a>
