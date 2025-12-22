@@ -1,30 +1,53 @@
 <h2>Login</h2>
 
-<form [formGroup]="form" (ngSubmit)="login()">
-  <input
-    type="text"
-    formControlName="identifier"
-    placeholder="Username oder Email"
-  />
+<div class="component-box">
+    <form [formGroup]="form" (ngSubmit)="login()">
+        <div class="radio-group-wrapper">
+            <span>Wie wollen Sie sich anmelden?</span>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" value="username" formControlName="identifierType">
+                    <span>Username</span>
+                </label>
+                <label>
+                    <input type="radio" value="email" formControlName="identifierType">
+                    <span>Email</span>
+                </label>
+            </div>
+        </div>
 
-  <select formControlName="identifierType">
-    <option value="username">Username</option>
-    <option value="email">Email</option>
-  </select>
+        <label class="text-input">
+            <span>{{ label }}</span>
+            <input
+                type="{{ inputType }}"
+                formControlName="identifier"
+                placeholder="{{ placeholder }}"
+            />
+        </label>
+        
+        <label class="text-input">
+            <span>Passwort</span>
+            <input
+                type="password"
+                formControlName="password"
+                placeholder="Passwort"
+            />
+        </label>
+        
+      
+        <button class="dark-button" type="submit" [disabled]="loading">
+            {{ loading ? 'Bitte warten…' : 'Login' }}
+        </button>
+      
+        @if (error) {
+            <p style="color:red">{{ error }}</p>
+        }
 
-  <input
-    type="password"
-    formControlName="password"
-    placeholder="Passwort"
-  />
+        <p>
+            <a routerLink="/register">Noch kein Account? Registrieren</a>
+        </p>
+    </form>
 
-  <button type="submit" [disabled]="loading">
-    {{ loading ? 'Bitte warten…' : 'Login' }}
-  </button>
+</div>
 
-  @if (error) {
-    <p style="color:red">{{ error }}</p>
-  }
-</form>
 
-<a routerLink="/register">Noch kein Account? Registrieren</a>

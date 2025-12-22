@@ -1,31 +1,45 @@
 <h2>Registrieren</h2>
 
-<form [formGroup]="form" (ngSubmit)="register()">
-  <input
-    type="text"
-    formControlName="username"
-    placeholder="Username"
-  />
+<div class="component-box">
+    <form [formGroup]="form" (ngSubmit)="register()">
+        <label class="text-input">
+            <span>Username</span>
+            <input
+                type="text"
+                formControlName="username"
+                placeholder="user"
+            />
+        </label>
 
-  <input
-    type="email"
-    formControlName="email"
-    placeholder="Email"
-  />
+        <label class="text-input">
+            <span>Email-Adresse</span>
+            <input
+                type="email"
+                formControlName="email"
+                placeholder="deine@email.net"
+            />
+        </label>
 
-  <input
-    type="password"
-    formControlName="password"
-    placeholder="Passwort"
-  />
+        <label class="text-input">
+            <span>Passwort</span>
+            <input
+                type="password"
+                formControlName="password"
+                placeholder="password"
+            />
+        </label>
+        
+        <button class="dark-button" type="submit" [disabled]="loading">
+            {{ loading ? 'Bitte warten…' : 'Registrieren' }}
+        </button>
+      
+        @if (error) {
+            <p style="color:red">{{ error }}</p>
+        }
 
-  <button type="submit" [disabled]="loading">
-    {{ loading ? 'Bitte warten…' : 'Registrieren' }}
-  </button>
+        <p>
+            <a routerLink="/login">Zurück zum Login</a>
+        </p>
+    </form>
 
-  @if (error) {
-    <p style="color:red">{{ error }}</p>
-  }
-</form>
-
-<a routerLink="/login">Zurück zum Login</a>
+</div>

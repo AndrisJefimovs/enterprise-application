@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
@@ -13,12 +13,15 @@ import { AuthService } from '../auth.service';
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
     form!: FormGroup;
 
     loading = false;
     error?: string;
+    label: string = '';
+    placeholder: string = '';
+    inputType: 'text' | 'email' = 'text';
 
     constructor(
         private fb: FormBuilder,
@@ -30,6 +33,43 @@ export class LoginComponent {
             identifierType: ['username', Validators.required],
             password: ['', Validators.required]
         });
+    }
+
+    ngOnInit(): void {
+        // Auf Änderungen des Radiobuttons reagieren
+        this.form.get('identifierType')!.valueChanges.subscribe(value => {
+            this.updateText(value);
+        });
+
+        // Initial setzen
+        this.updateText(this.form.get('identifierType')!.value);
+    }
+
+    updateText(value: string) {
+        const identifierCtrl = this.form.get('identifier');
+        if (!identifierCtrl) return;
+        
+        switch (value) {
+            case "username":
+                this.placeholder = "User";
+                this.label = "Username";
+                this.inputType = "text";
+                identifierCtrl.setValidators([
+                    Validators.required
+                ]);
+                break;
+            case "email":
+                this.placeholder = "deine@email.net";
+                this.label = "Email-Adresse";
+                this.inputType = "email";
+                identifierCtrl.setValidators([
+                    Validators.required,
+                    Validators.email
+                ]);
+                break;
+        }
+
+        identifierCtrl.updateValueAndValidity();
     }
 
     login(): void {
