@@ -26,7 +26,7 @@ export class RegisterComponent {
         private router: Router
     ) {
         this.form = this.fb.nonNullable.group({
-            username: ['', [Validators.required, Validators.maxLength(63)]],
+            username: ['', [Validators.required, Validators.maxLength(24)]],
             email: ['', [Validators.required, Validators.email, Validators.maxLength(127)]],
             password: ['', [Validators.required, Validators.maxLength(255)]]
         });
