@@ -109,7 +109,7 @@ Data Transfer Objects (DTOs) are Objects that are being sent between the server 
 
 ### RegisterRequest
 
-- **`username`** (String): Username of the new user. This has to be unique. **Maximum length is 63**.
+- **`username`** (String): Username of the new user. This has to be unique. **Maximum length is 24**.
 - **`email`** (String): The email address of the user. This also has to be unique. **Maximum length is 127**.
 - **`password`** (String): The password of the user. **Maximum length is 255**.
 

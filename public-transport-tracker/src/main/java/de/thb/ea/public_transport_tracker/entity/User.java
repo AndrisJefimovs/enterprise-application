@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Long id;
 
-    @Column(unique = true, length = 63, nullable = false)
+    @Column(unique = true, length = 24, nullable = false)
     private String username;
 
     @Column(unique = true, length = 127, nullable = false)
