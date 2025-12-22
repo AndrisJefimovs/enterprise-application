@@ -47,7 +47,7 @@ public class RESTController {
      * @param token jwt auth token from header
      * @param userId user id of reqested user.
      * @return user with specified id
-     * @throws ResponseStatusException 404 if user not found
+     * @throws ResponseStatusException 404 if user not found; 401 if token is invalid
      */
     @GetMapping("users/{id}")
     public UserDTO getUser(@RequestHeader("Authorization") String token,
@@ -60,10 +60,16 @@ public class RESTController {
         }
 
         token = token.substring(7); // remove "Bearer " from token
-        String clientUsername = jwtService.extractUsername(token);
+        String clientUsername;
+        try {
+            clientUsername = jwtService.extractUsername(token);;
+        } 
+        catch (JwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
         User clientUser = userService.getUserByUsername(clientUsername);
 
-        // if user is admin or asks for its own data give all information
+        // if user is admin or user asks for its own data give all information
         if (clientUser.hasRole("ROLE_ADMIN") || clientUser.getId() == userId) {
             return UserDTO.mapFull(user);
         }
@@ -74,12 +80,11 @@ public class RESTController {
 
 
     /**
-     * http://localhost:8080/api/v1/users/{id}
+     * http://localhost:8080/api/v1/users/me
      * 
      * @param token jwt auth token from header
-     * @param userId user id of reqested user.
-     * @return user with specified id
-     * @throws ResponseStatusException 404 if user not found
+     * @return own user object
+     * @throws ResponseStatusException 401 token is invalid
      */
     @GetMapping("users/me")
     public UserDTO getClientUser(@RequestHeader("Authorization") String token)
