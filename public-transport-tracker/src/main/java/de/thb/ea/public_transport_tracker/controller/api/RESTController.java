@@ -8,6 +8,7 @@ import de.thb.ea.public_transport_tracker.controller.api.model.UserDTO;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
 import de.thb.ea.public_transport_tracker.service.UserService;
+import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
+
 
 
 @RestController
@@ -48,7 +50,7 @@ public class RESTController {
      * @throws ResponseStatusException 404 if user not found
      */
     @GetMapping("users/{id}")
-    public UserDTO getMethodName(@RequestHeader("Authorization") String token,
+    public UserDTO getUser(@RequestHeader("Authorization") String token,
                                  @PathVariable("id") Long userId)
             throws ResponseStatusException {
         User user = userService.getUserById(userId);
@@ -68,6 +70,31 @@ public class RESTController {
         
         // if user asks for other user give only sparse informaion
         return UserDTO.mapSparse(user);
+    }
+
+
+    /**
+     * http://localhost:8080/api/v1/users/{id}
+     * 
+     * @param token jwt auth token from header
+     * @param userId user id of reqested user.
+     * @return user with specified id
+     * @throws ResponseStatusException 404 if user not found
+     */
+    @GetMapping("users/me")
+    public UserDTO getClientUser(@RequestHeader("Authorization") String token)
+        throws ResponseStatusException {
+
+        token = token.substring(7);
+        String username;
+        try {
+            username = jwtService.extractUsername(token);
+        }
+        catch (JwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        return UserDTO.mapFull(userService.getUserByUsername(username));
     }
     
 
