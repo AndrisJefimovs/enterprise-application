@@ -1,0 +1,15 @@
+.h1-wrapper {
+    flex: 1;
+    margin-top: 20vh;
+}
+
+.placeholder {
+    flex: 1;
+}
+
+.buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5vh;
+    margin-top: auto;
+}

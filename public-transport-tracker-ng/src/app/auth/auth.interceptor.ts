@@ -14,7 +14,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (req.url.includes('/auth/')) {
+  if (req.url.endsWith('/auth/register') || req.url.endsWith('/auth/login') || req.url.endsWith('/auth/refresh') || req.url.endsWith('/')) {
     return next(req);
   }
 
