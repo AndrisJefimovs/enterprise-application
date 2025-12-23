@@ -71,12 +71,16 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
         User user;
-        if (request.getIdentifierType().equals("username"))
-            user = userService.getUserByUsername(request.getIdentifier());
-        else if (request.getIdentifierType().equals("email"))
-            user = userService.getUserByEmail(request.getIdentifier());
-        else
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        switch (request.getIdentifierType()) {
+            case USERNAME:
+                user = userService.getUserByUsername(request.getIdentifier());
+                break;
+            case EMAIL:
+                user = userService.getUserByEmail(request.getIdentifier());
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
 
         if (user == null)
             return AuthResponseDTO.userNotFound();
