@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import de.thb.ea.public_transport_tracker.filter.JwtAuthFilter;
+import de.thb.ea.public_transport_tracker.service.UserService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -30,17 +31,18 @@ import lombok.AllArgsConstructor;
 public class SecurityConfig {
     
     private final JwtAuthFilter jwtAuthFilter;
-    private final UserDetailsService userDetailsService;
+    private final UserService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors((cors) -> cors
-                .configurationSource(corsConfigurationSource())
-            )
-
             // csrf not needed for stateless JWT
             .csrf(csrf -> csrf.disable())
+
+            .cors((cors) -> cors
+                .configurationSource(corsConfiguration())
+            )
 
             // endpoints
             .authorizeHttpRequests(auth -> auth
@@ -67,14 +69,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
@@ -85,7 +82,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    UrlBasedCorsConfigurationSource corsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

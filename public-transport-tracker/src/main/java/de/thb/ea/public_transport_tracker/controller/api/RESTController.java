@@ -39,7 +39,6 @@ public class RESTController {
      */
     @GetMapping("users")
     public List<UserDTO> getAllUsers() {
-        System.out.println("GET /api/v1/users");
         List<User> users = userService.getAllUsers();
         return users.stream().map(UserDTO::mapSparse).collect(Collectors.toList());
     }
@@ -106,7 +105,7 @@ public class RESTController {
         User user;
         try {
             username = jwtService.extractUsername(token);
-            user = userService.getUserByUsername(username);
+            user = userService.loadUserByUsername(username);
         } 
         catch (JwtException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

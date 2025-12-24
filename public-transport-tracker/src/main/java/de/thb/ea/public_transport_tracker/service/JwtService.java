@@ -33,9 +33,9 @@ public class JwtService {
     @Value("${security.jwt.refresh-expiration-time}")
     private Long jwtRefreshExpiration;
 
-    private UserInfoService userInfoService;
+    private UserService userInfoService;
 
-    public JwtService(UserInfoService userInfoService) {
+    public JwtService(UserService userInfoService) {
         this.userInfoService = userInfoService;
     }
 

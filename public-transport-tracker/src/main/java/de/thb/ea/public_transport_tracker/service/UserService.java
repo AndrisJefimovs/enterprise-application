@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import de.thb.ea.public_transport_tracker.repository.UserRepository;
 
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -25,7 +26,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       RoleService roleService) {
         this.userRepository = userRepository;
         this. passwordEncoder = passwordEncoder;
         this.roleService = roleService;
@@ -59,7 +61,8 @@ public class UserService {
      * @return user
      * @throws UsernameNotFoundException If no user with spedified username found.
      */
-    public User getUserByUsername(String username) throws UsernameNotFoundException {
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
 
         if (user.isEmpty()) {
@@ -76,7 +79,7 @@ public class UserService {
      * @return user
      * @throws UsernameNotFoundException If no user with specified email address found.
      */
-    public User getUserByEmail(String email) throws UsernameNotFoundException {
+    public User loadUserByEmail(String email) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isEmpty()) {
@@ -269,6 +272,20 @@ public class UserService {
         if (email == null)
             throw new IllegalArgumentException("email must not be null");
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    /**
+     * This method updates and returns a new valid refresh version number of an user.
+     * 
+     * @param user
+     * @return New refresh version
+     * @throws Exception if something went wrong (probably the user could not be updated in DB)
+     */
+    public Integer nextRefreshVersion(User user) throws Exception {
+        user.setRefreshVersion(user.getRefreshVersion() + 1);
+        if (!updateUser(user))
+            throw new Exception("Failed to update user in database");
+        return user.getRefreshVersion();
     }
 
 }

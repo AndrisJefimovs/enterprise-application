@@ -73,10 +73,10 @@ public class AuthController {
         User user;
         switch (request.getIdentifierType()) {
             case USERNAME:
-                user = userService.getUserByUsername(request.getIdentifier());
+                user = userService.loadUserByUsername(request.getIdentifier());
                 break;
             case EMAIL:
-                user = userService.getUserByEmail(request.getIdentifier());
+                user = userService.loadUserByEmail(request.getIdentifier());
                 break;
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -112,7 +112,7 @@ public class AuthController {
         if (request.getRefreshToken() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        User user = userService.getUserByUsername(
+        User user = userService.loadUserByUsername(
             jwtService.extractUsername(request.getRefreshToken())
         );
 
