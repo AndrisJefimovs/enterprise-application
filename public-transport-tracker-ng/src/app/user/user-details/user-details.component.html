@@ -1,0 +1,42 @@
+<h2>User Details</h2>
+
+<div class="component-box user-details">
+    @if (user) {
+        <h2>#{{ userId }}</h2>
+        <h1>{{ user.username }}</h1>
+        <div class="vline"></div>
+
+        <ul>
+            @if (user.email) {
+                <li>
+                    <h1>Email-Adresse</h1>
+                    <span>{{ user.email }}</span>
+                </li>
+            }
+            @if (user.roleIds) {
+                <li>
+                    <h1>Rollen</h1>
+                    <span>{{ user.roleIds }}</span>
+                </li>
+            }
+            @if (user.createdAt) {
+                <li>
+                    <h1>Erstellt am</h1>
+                    <span>{{ user.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                </li>
+            }
+            @if (user.updatedAt) {
+                <li>
+                    <h1>Aktualisiert am</h1>
+                    <span>{{ user.updatedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                </li>
+            }
+            @if (user.refreshVersion) {
+                <li>
+                    <h1>Refresh Version</h1>
+                    <span>{{ user.refreshVersion }}</span>
+                </li>
+            }
+        </ul>
+    }
+</div>

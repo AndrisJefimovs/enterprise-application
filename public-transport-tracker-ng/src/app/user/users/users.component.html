@@ -3,7 +3,7 @@
 <div class="component-box component-box-list">
     <ul>
         @for (user of users; track user.id) {
-            <li routerLink="/users/{{ user.username }}">
+            <li routerLink="/users/{{ user.id }}">
                 <h1>{{ user.username }}</h1>
                 <span>{{ user.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
             </li>
