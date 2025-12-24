@@ -9,14 +9,16 @@ import lombok.Data;
 @Data
 @Builder
 public class AuthResponseDTO {
+    private Long userId;
     private String token;
     private String refreshToken;
     private Integer statusCode;
     private String statusMessage;
 
 
-    public static AuthResponseDTO success(String authToken, String refreshToken) {
+    public static AuthResponseDTO success(Long userId, String authToken, String refreshToken) {
         return AuthResponseDTO.builder()
+                .userId(userId)
                 .token(authToken)
                 .refreshToken(refreshToken)
                 .statusCode(StatusCode.SUCCESS.index())

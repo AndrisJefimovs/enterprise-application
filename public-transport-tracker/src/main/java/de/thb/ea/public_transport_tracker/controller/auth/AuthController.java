@@ -99,7 +99,7 @@ public class AuthController {
             if (token == null || refreshToken == null)
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            return AuthResponseDTO.success(token, refreshToken);
+            return AuthResponseDTO.success(user.getId(), token, refreshToken);
         }
             
         
@@ -126,7 +126,7 @@ public class AuthController {
             if (token == null || refreshToken == null)
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            return AuthResponseDTO.success(token, refreshToken);
+            return AuthResponseDTO.success(user.getId(), token, refreshToken);
         }
         
         return AuthResponseDTO.invalidCredentials();

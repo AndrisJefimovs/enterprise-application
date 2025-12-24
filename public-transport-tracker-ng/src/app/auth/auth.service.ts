@@ -5,41 +5,55 @@ import { IAuthResponse, IRegisterResponse } from './model/response';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from '../core/token.service';
 
+
+const USER_ID_KEY: string = 'USER_ID';
+
+
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
   
-    private readonly API = 'http://localhost:8080/auth';
+    private readonly API: string = 'http://localhost:8080/auth';
 
     constructor(
         private http: HttpClient,
         private tokenService: TokenService
     ) {}
 
-    login(req: ILoginRequest): Observable<IAuthResponse> {
+    public login(req: ILoginRequest): Observable<IAuthResponse> {
         return this.http.post<IAuthResponse>(`${this.API}/login`, req)
             .pipe(
                 tap(res => {
-                    if (res.statusCode === 0) {
+                    if (res.statusCode === 0 && res.token && res.refreshToken && res.userId) {
                         this.tokenService.saveTokens(res.token, res.refreshToken);
+                        localStorage.setItem(USER_ID_KEY, String(res.userId));
                     }
                 })
             );
     }
 
-    register(req: IRegisterRequest): Observable<IRegisterResponse> {
+    public register(req: IRegisterRequest): Observable<IRegisterResponse> {
         return this.http.post<IRegisterResponse>(`${this.API}/register`, req);
     }
 
-    refreshToken(): Observable<IAuthResponse> {
+    public refreshToken(): Observable<IAuthResponse> {
         return this.http.post<IAuthResponse>(`${this.API}/refresh`, {
             refreshToken: this.tokenService.getRefreshToken()
         });
     }
 
-    logout(): void {
+    public logout(): void {
         this.tokenService.clear();
+        localStorage.removeItem(USER_ID_KEY);
+    }
+
+    public getId(): number | null {
+        let userId: string | null = localStorage.getItem(USER_ID_KEY);
+        if (userId) {
+            return Number(userId);
+        }
+        return null;
     }
 
 }

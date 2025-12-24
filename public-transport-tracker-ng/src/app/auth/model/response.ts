@@ -1,6 +1,7 @@
 export interface IAuthResponse {
-    token: string;
-    refreshToken: string;
+    userId: number | null;
+    token: string | null;
+    refreshToken: string | null;
     statusCode: number;
     statusMessage: string;
 }
