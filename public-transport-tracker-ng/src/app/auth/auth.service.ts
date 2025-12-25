@@ -25,9 +25,9 @@ export class AuthService {
         return this.http.post<IAuthResponse>(`${this.API}/login`, req)
             .pipe(
                 tap(res => {
-                    if (res.statusCode === 0 && res.token && res.refreshToken && res.userId) {
-                        this.tokenService.saveTokens(res.token, res.refreshToken);
-                        localStorage.setItem(USER_ID_KEY, String(res.userId));
+                    if (res.statusCode === 0) {
+                        this.tokenService.saveTokens(res.token!, res.refreshToken!);
+                        localStorage.setItem(USER_ID_KEY, String(res.userId!));
                     }
                 })
             );

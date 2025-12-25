@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { TokenService } from '../core/token.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -8,12 +8,13 @@ import { TokenService } from '../core/token.service';
 export class AuthGuard implements CanActivate {
 
     constructor(
-        private tokenService: TokenService,
+        private authService: AuthService,
         private router: Router
     ) {}
 
     canActivate(): boolean {
-        if (!this.tokenService.getToken()) {
+        // can activate if user id is set
+        if (!this.authService.getId()) {
             this.router.navigate(['/login']);
             return false;
         }

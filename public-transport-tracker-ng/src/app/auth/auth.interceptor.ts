@@ -10,60 +10,64 @@ let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
-  const tokenService = inject(TokenService);
-  const authService = inject(AuthService);
-  const router = inject(Router);
+    const tokenService = inject(TokenService);
+    const authService = inject(AuthService);
+    const router = inject(Router);
 
-  if (req.url.endsWith('/auth/register') || req.url.endsWith('/auth/login') || req.url.endsWith('/auth/refresh') || req.url.endsWith('/')) {
-    return next(req);
-  }
+    if (
+        req.url.endsWith('/auth/register')
+        || req.url.endsWith('/auth/login')
+        || req.url.endsWith('/auth/refresh')
+    ) {
+        return next(req);
+    }
 
-  const token = tokenService.getToken();
+    const token = tokenService.getToken();
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+    const authReq = token
+        ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+        : req;
 
-  return next(authReq).pipe(
-    catchError(err => {
+    return next(authReq).pipe(
+        catchError(err => {
 
-      if (err.status !== 401) {
-        return throwError(() => err);
-      }
+            if (err.status !== 401) {
+                return throwError(() => err);
+            }
 
-      if (isRefreshing) {
-        return throwError(() => err);
-      }
+            if (isRefreshing) {
+                return throwError(() => err);
+            }
 
-      isRefreshing = true;
+            isRefreshing = true;
 
-      return authService.refreshToken().pipe(
-        switchMap(res => {
-          isRefreshing = false;
+            return authService.refreshToken().pipe(
+                switchMap(res => {
+                    isRefreshing = false;
 
-          if (res.statusCode === 0 && res.token) {
-            tokenService.saveTokens(res.token, res.refreshToken!);
+                    if (res.statusCode === 0) {
+                        tokenService.saveTokens(res.token!, res.refreshToken!);
 
-            return next(
-              authReq.clone({
-                setHeaders: {
-                  Authorization: `Bearer ${res.token}`
-                }
-              })
+                        return next(
+                            authReq.clone({
+                                setHeaders: {
+                                    Authorization: `Bearer ${res.token}`
+                                }
+                            })
+                        );
+                    }
+
+                    authService.logout();
+                    router.navigate(['/login']);
+                    return throwError(() => err);
+                }),
+                catchError(refreshErr => {
+                    isRefreshing = false;
+                    authService.logout();
+                    router.navigate(['/login']);
+                    return throwError(() => refreshErr);
+                })
             );
-          }
-
-          tokenService.clear();
-          router.navigate(['/login']);
-          return throwError(() => err);
-        }),
-        catchError(refreshErr => {
-          isRefreshing = false;
-          tokenService.clear();
-          router.navigate(['/login']);
-          return throwError(() => refreshErr);
         })
-      );
-    })
-  );
+    );
 };
