@@ -38,6 +38,7 @@ public class SecurityConfig {
             // csrf not needed for stateless JWT
             .csrf(csrf -> csrf.disable())
 
+            // set cors config
             .cors((cors) -> cors
                 .configurationSource(corsConfiguration())
             )

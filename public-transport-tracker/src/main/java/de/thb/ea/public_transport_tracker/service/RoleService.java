@@ -1,5 +1,6 @@
 package de.thb.ea.public_transport_tracker.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -14,14 +15,20 @@ public class RoleService {
 
     private final Logger logger = LoggerFactory.getLogger(RoleService.class);
 
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     public RoleService(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
+
+    public List<Role> getAllRoles() {
+        return (List<Role>) roleRepository.findAll();
+    }
+
     /**
      * Get role instance by name.
+     * 
      * @param roleName
      * @return Role or null if no role with role name exists.
      */
@@ -36,12 +43,14 @@ public class RoleService {
 
 
     /**
-     * Create and add new Role to the repository.
+     * Create and add new role by name.
      * 
      * @param roleName
-     * @return Ok.
+     * @return Role or null if failed.
      */
-    public Boolean addNewRole(String roleName) {
+    public Role addNewRole(String roleName) {
+        if (roleName == null)
+            return null;
         return addNewRole(Role.builder().name(roleName).build());
     }
 
@@ -50,52 +59,81 @@ public class RoleService {
      * Add a new role to the repository.
      * 
      * @param role
-     * @return Ok.
+     * @return Role or null if failed.
      */
-    public Boolean addNewRole(Role role) {
+    public Role addNewRole(Role role) {
+        if (role == null)
+            return null;
+
         role.forgetId();
         
         try {
-            roleRepository.save(role);
+            role = roleRepository.save(role);
         }
         catch (Exception e) {
             logger.info(String.format("Failed to create new role with name '%s'", role.getName()));
             logger.debug(e.toString());
-            return false;
+            return null;
         }
         logger.info(String.format("Successfully created new role '%s' with id %d", role.getName(),
-                                    role.getId()));
-        return true;
+                                  role.getId()));
+        return role;
     }
 
 
     /**
-     * Delete a specific role instance from database.
+     * Delete a specific role from repository.
      * 
      * @param role
-     * @return Ok.
+     * @return The deleted role or null if failed.
      */
-    public Boolean deleteRole(Role role) {
+    public Role deleteRole(Role role) {
+        if (role == null)
+            return null;
+
         try {
             roleRepository.delete(role);
         }
         catch (Exception e) {
             logger.info(String.format("Failed to delete role '%s'", role.getName()));
             logger.debug(e.toString());
-            return false;
+            return null;
         }
         logger.info(String.format("Successfully deleted role '%s'", role.getName()));
-        return true;
+        return role;
     }
 
 
     /**
-     * Check if a role exists by its name.
+     * Update an existing role.
+     * 
+     * @param role
+     * @return updated role instance or null if failed.
+     */
+    public Role updateRole(Role role) {
+        if (role == null)
+            return null;
+
+        try {
+            if (roleExists(role.getName()))
+                role = roleRepository.save(role);
+        }
+        catch (Exception e) {
+            return null;
+        }
+        return role;
+    }
+
+
+    /**
+     * Check if a role exists by name.
      * 
      * @param roleName
-     * @return true if role exists, otherwise false.
+     * @return true if role exists; otherwise false.
      */
-    public Boolean roleExists(String roleName) {
+    public boolean roleExists(String roleName) {
+        if (roleName == null)
+            return false;
         return roleRepository.findByName(roleName).isPresent();
     }
 }

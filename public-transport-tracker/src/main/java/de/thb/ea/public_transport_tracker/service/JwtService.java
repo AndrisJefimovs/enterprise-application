@@ -33,10 +33,10 @@ public class JwtService {
     @Value("${security.jwt.refresh-expiration-time}")
     private Long jwtRefreshExpiration;
 
-    private UserService userInfoService;
+    private final UserService userService;
 
-    public JwtService(UserService userInfoService) {
-        this.userInfoService = userInfoService;
+    public JwtService(UserService userService) {
+        this.userService = userService;
     }
 
 
@@ -71,7 +71,7 @@ public class JwtService {
 
         Integer refreshVersion;
         try {
-            refreshVersion = userInfoService.nextRefreshVersion(user);
+            refreshVersion = userService.nextRefreshVersion(user);
         }
         catch (Exception e) {
             logger.warn(String.format("Failed to update user (id: %d) with new refresh version.",

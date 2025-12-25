@@ -1,12 +1,11 @@
 package de.thb.ea.public_transport_tracker.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,25 +23,48 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleService roleService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       RoleService roleService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this. passwordEncoder = passwordEncoder;
-        this.roleService = roleService;
     }
 
+
     /**
-     * Get all users.
+     * Get UserDetails by username.
+     * Just for implementation of UserDetailsService.
+     * 
+     * @param username Username of the user (must not be null).
+     * @return user
+     * @throws UsernameNotFoundException If no user with specified username found.
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (username == null) {
+            throw new UsernameNotFoundException("null is not a valid username.");
+        }
+        User user = getUserByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(String.format("No user found with username '%s'",
+                                                              username));
+        }
+        return user;
+    }
+
+
+    /**
+     * Get all users from repository.
+     * 
      * @return list of all users.
      */
     public List<User> getAllUsers() {
         return (List<User>) userRepository.findAll();
     }
 
+
     /**
      * Get user by id.
+     * 
      * @param id User id.
      * @return user or null if no user with this id exists.
      */
@@ -55,37 +77,39 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
+
     /**
-     * Ths function returns the user with the specified username.
-     * @param username Username of the user (must not be null).
-     * @return user
-     * @throws UsernameNotFoundException If no user with spedified username found.
+     * Get user by username.
+     * 
+     * @param username Username of the user.
+     * @return user or null if failed.
      */
-    @Override
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User getUserByUsername(String username) {
+        if (username == null)
+            return null;
+
         Optional<User> user = userRepository.findByUsername(username);
-
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("No user with username '" + username + "' found.");
+            return null;
         }
-
         return user.get();
     }
+
 
     /**
      * This function returns the user assotiated with the email address.
      * 
-     * @param email Email address of the user (must not be null).
-     * @return user
-     * @throws UsernameNotFoundException If no user with specified email address found.
+     * @param email Email address of the user.
+     * @return user of null if failed.
      */
-    public User loadUserByEmail(String email) throws UsernameNotFoundException {
+    public User getUserByEmail(String email) {
+        if (email == null)
+            return null;
+
         Optional<User> user = userRepository.findByEmail(email);
-
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("No user with email '" + email + "' found.");
+            return null;
         }
-
         return user.get();
     }
 
@@ -110,117 +134,61 @@ public class UserService implements UserDetailsService {
         return userRepository.findByRoles(role);
     } 
 
-    /**
-     * This function tries to add an user to the database. It also creates the roles.
-     * 
-     * @param user The user that should be added to the database (must not be null).
-     * @return Ok.
-     * @throws IllegalArgumentException if user is null.
-     */
-    public Boolean addNewUserWithRoles(User user) throws IllegalArgumentException {
-        if (user == null)
-            throw new IllegalArgumentException("user must not be null");
-
-        user.forgetId(); // prevent updating existing users
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // create not existing roles
-        Set<Role> newRoles = new HashSet<>();
-
-        for (Role role : user.getRoles()) {
-            Role r = roleService.getRoleByName(role.getName());
-            if (r == null) {
-                if (!roleService.addNewRole(role)) {
-                    logger.warn(String.format("User '%s' was not created because the role '%s'"+
-                                " could not be created", user.getUsername(), role.getName()));
-                    return false;
-                }
-                else {
-                    newRoles.add(role);
-                }
-            }
-            else {
-                newRoles.add(r);
-            }
-        }
-        user.setRoles(newRoles);
-
-        try {
-            userRepository.save(user);
-        }
-        catch (Exception e) {
-            logger.warn(String.format("Failed to create new user '%s'", user.getUsername()));
-            logger.debug(e.toString());
-            return false;
-        }
-        logger.info(String.format("Successfully created new user '%s' with id %d",
-                                    user.getUsername(), user.getId()));
-        return true;
-    }
 
     /**
-     * This function tries to add an user to the database.
+     * This function tries to add an user to the repository.
      * 
-     * @param user The user that should be added to the database (must not be null).
-     * @return Ok.
-     * @throws IllegalArgumentException if user is null.
+     * @param user The user that should be added to the repository.
+     * @return The added user instance or null if failed.
      */
-    public Boolean addNewUser(User user) throws IllegalArgumentException {
+    public User addNewUser(User user) {
         if (user == null)
-            throw new IllegalArgumentException("user must not be null");
-
-        Set<Role> newRoles = new HashSet<>();
-
-        for (Role role : user.getRoles()) {
-            Role r = roleService.getRoleByName(role.getName());
-            if (r == null) {
-                logger.warn(String.format("Failed to add user '%s' because role '%s' does not" +
-                            " exist", user.getUsername(), role.getName()));
-                return false;
-            }
-            newRoles.add(r);
-        }
-        user.setRoles(newRoles);
+            return null;
 
         user.forgetId(); // prevent updating existing users
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // hash password
         try {
-            userRepository.save(user);
+            user = userRepository.save(user);
         }
         catch (Exception e) {
             logger.info(String.format("Failed to create new user '%s'", user.getUsername()));
             logger.debug(e.toString());
-            return false;
+            return null;
         }
         logger.info(String.format("Successfully created new user '%s' with id %d",
-                                    user.getUsername(), user.getId()));
-        return true;
+                                  user.getUsername(), user.getId()));
+        return user;
     }
 
     /**
      * Tries to update a user if it exists.
      * 
      * @param user
-     * @return true if user was successfully updated; oterwise false
+     * @return updated user instance or null if failed.
      */
-    public Boolean updateUser(User user) {
+    public User updateUser(User user) {
+        if (user == null)
+            return null;
         try {
             if (userIdExists(user.getId()))
-                userRepository.save(user);
+                user = userRepository.save(user);
         }
         catch (Exception e) {
-            return false;
+            return null;
         }
-        return true;
+        return user;
     }
 
     /**
-     * Delete a user from the database.
+     * Delete a user from the repository.
      * 
      * @param user The user to delete.
-     * @return Ok.
+     * @return The deleted user instance or null if failed.
      */
-    public Boolean deleteUser(User user) {
+    public User deleteUser(User user) {
+        if (user == null)
+            return null;
+
         try {
             userRepository.delete(user);
         }
@@ -228,11 +196,11 @@ public class UserService implements UserDetailsService {
             logger.info(String.format("Failed to delete user '%s' with id %d", user.getUsername(),
                                         user.getId()));
             logger.debug(e.toString());
-            return false;
+            return null;
         }
         logger.info(String.format("Deleted user '%s' with id %d", user.getUsername(),
                                     user.getId()));
-        return true;
+        return user;
     }
 
     /**
@@ -240,11 +208,10 @@ public class UserService implements UserDetailsService {
      * 
      * @param userId
      * @return true if user exists; otherwise false
-     * @throws IllegalArgumentException if userId is null.
      */
-    public Boolean userIdExists(Long userId) throws IllegalArgumentException {
+    public boolean userIdExists(Long userId) {
         if (userId == null)
-            throw new IllegalArgumentException("User Id must not be null");
+            return false;
         return userRepository.findById(userId).isPresent();
     }
 
@@ -253,11 +220,10 @@ public class UserService implements UserDetailsService {
      * 
      * @param username
      * @return true if the username exists; otherwise false
-     * @throws IllegalArgumentException if username is null.
      */
-    public Boolean usernameExists(String username) throws IllegalArgumentException {
+    public boolean usernameExists(String username) {
         if (username == null)
-            throw new IllegalArgumentException("username must not be null");
+            return false;
         return userRepository.findByUsername(username).isPresent();
     }
 
@@ -265,12 +231,11 @@ public class UserService implements UserDetailsService {
      * This function checks if a user with the given email already exists.
      * 
      * @param email
-     * @return true if the email already exists.
-     * @throws IllegalArgumentException if email is null.
+     * @return true if the email already exists; otherwise false.
      */
-    public Boolean emailExists(String email) throws IllegalArgumentException {
+    public boolean emailExists(String email) {
         if (email == null)
-            throw new IllegalArgumentException("email must not be null");
+            return false;
         return userRepository.findByEmail(email).isPresent();
     }
 
@@ -278,13 +243,12 @@ public class UserService implements UserDetailsService {
      * This method updates and returns a new valid refresh version number of an user.
      * 
      * @param user
-     * @return New refresh version
-     * @throws Exception if something went wrong (probably the user could not be updated in DB)
+     * @return New refresh version or null if something went wrong.
      */
-    public Integer nextRefreshVersion(User user) throws Exception {
+    public Integer nextRefreshVersion(User user) {
         user.setRefreshVersion(user.getRefreshVersion() + 1);
-        if (!updateUser(user))
-            throw new Exception("Failed to update user in database");
+        if (updateUser(user) == null)
+            return null;
         return user.getRefreshVersion();
     }
 

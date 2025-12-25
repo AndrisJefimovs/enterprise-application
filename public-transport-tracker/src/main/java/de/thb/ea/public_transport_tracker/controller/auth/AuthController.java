@@ -1,7 +1,7 @@
 package de.thb.ea.public_transport_tracker.controller.auth;
 
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,9 +18,9 @@ import de.thb.ea.public_transport_tracker.controller.auth.model.LoginRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RefreshRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterResponseDTO;
-import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
+import de.thb.ea.public_transport_tracker.service.RoleService;
 import de.thb.ea.public_transport_tracker.service.UserService;
 import lombok.AllArgsConstructor;
 
@@ -29,9 +29,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AuthController {
 
-    private UserService userService;
-    private JwtService jwtService;
-    private AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final RoleService roleService;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     
     @PostMapping("register")
@@ -47,19 +48,19 @@ public class AuthController {
         if (userService.emailExists(request.getEmail()))
             return RegisterResponseDTO.emailAlreadyTaken();
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(Role.builder().name("ROLE_USER").build());
-        User user = User.builder()
-                        .username(request.getUsername())
-                        .email(request.getEmail())
-                        .password(request.getPassword())
-                        .roles(roles)
-                        .build();
+        User user = userService.addNewUser(
+            User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .roles(new HashSet<>(Arrays.asList(roleService.getRoleByName("USER"))))
+                .build()
+        );
 
-        if (userService.addNewUser(user))
-            return RegisterResponseDTO.success();
-        
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            
+        return RegisterResponseDTO.success();
     }
 
 
@@ -73,10 +74,10 @@ public class AuthController {
         User user;
         switch (request.getIdentifierType()) {
             case USERNAME:
-                user = userService.loadUserByUsername(request.getIdentifier());
+                user = userService.getUserByUsername(request.getIdentifier());
                 break;
             case EMAIL:
-                user = userService.loadUserByEmail(request.getIdentifier());
+                user = userService.getUserByEmail(request.getIdentifier());
                 break;
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -112,7 +113,7 @@ public class AuthController {
         if (request.getRefreshToken() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        User user = userService.loadUserByUsername(
+        User user = userService.getUserByUsername(
             jwtService.extractUsername(request.getRefreshToken())
         );
 

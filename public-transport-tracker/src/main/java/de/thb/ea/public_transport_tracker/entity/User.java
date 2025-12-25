@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -77,7 +76,7 @@ public class User implements UserDetails {
 
 
     /**
-     * This method can be used to ensure a that the user object has no id. This way a new id is
+     * This method can be used to ensure that the user object has no id. This way a new id is
      * generated when saving it to the database.
      */
     public void forgetId() {
@@ -87,35 +86,49 @@ public class User implements UserDetails {
 
     /**
      * Check if user has a specific role.
+     * 
      * @param role
      * @return true if it has the role; otherwise false.
      */
-    public Boolean hasRole(Role role) {
+    public boolean hasRole(Role role) {
         return roles.contains(role);
     }
 
 
     /**
-     * Check if user has a role with specified rolename.
-     * @param roleName
-     * @return true if user has role; otherwise false.
+     * Check if user has a specific permission.
+     * 
+     * @param permission
+     * @return true if it has the permission; otherwise false.
      */
-    public Boolean hasRole(String roleName) {
+    public boolean hasPermission(Permission permission) {
         for (Role role : roles) {
-            if (role.getName().equals(roleName))
+            if (role.hasPermission(permission))
                 return true;
         }
         return false;
     }
 
 
+    /**
+     * This function returns all granted authorities of a user. Granted authorities can either be
+     * roles "ROLE_<ROLE_NAME>" or permissions "PERM_<PERMISSION_NAME>"
+     * 
+     * @return collection of all graneted authorities 
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles
-                // get set of role names (strings)
-                .stream().map(Role::getName).collect(Collectors.toSet())
-                // get list of GrantedAuthorities
-                .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : roles) {
+            // add role authority
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            for (Permission permission : role.getPermissions()) {
+                // add permission authority
+                authorities.add(new SimpleGrantedAuthority("PERM_" + permission.getName()));
+            }
+        }
+
+        return authorities;
     }
 
     @Override

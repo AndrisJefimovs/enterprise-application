@@ -17,6 +17,10 @@
             "description": "The default admin username. Will be created if no admin in repository."
         },
         {
+            "name": "application.users.admin.email",
+            "description": "The default admin email."
+        },
+        {
             "name": "application.users.admin.password",
             "description": "The password for default admin user."
         }
