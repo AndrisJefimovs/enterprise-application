@@ -22,6 +22,7 @@ import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
 import de.thb.ea.public_transport_tracker.service.RoleService;
 import de.thb.ea.public_transport_tracker.service.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -65,7 +66,9 @@ public class AuthController {
 
 
     @PostMapping("login")
-    public AuthResponseDTO authenticateUser(@RequestBody LoginRequestDTO request) {
+    public AuthResponseDTO authenticateUser(@RequestBody LoginRequestDTO request)
+        throws ResponseStatusException {
+
         if (request.getIdentifier() == null ||
             request.getIdentifierType() == null ||
             request.getPassword() == null)
@@ -85,6 +88,10 @@ public class AuthController {
 
         if (user == null)
             return AuthResponseDTO.userNotFound();
+
+        // return forbidden when login is disabled
+        if (user.getPassword() == null)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -109,13 +116,22 @@ public class AuthController {
 
 
     @PostMapping("refresh")
-    public AuthResponseDTO reauthenticateUser(@RequestBody RefreshRequestDTO request) {
+    public AuthResponseDTO reauthenticateUser(@RequestBody RefreshRequestDTO request)
+        throws ResponseStatusException {
+        
         if (request.getRefreshToken() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        User user = userService.getUserByUsername(
-            jwtService.extractUsername(request.getRefreshToken())
-        );
+        String username;
+
+        try {
+            username = jwtService.extractUsername(request.getRefreshToken());
+        }
+        catch (ExpiredJwtException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userService.getUserByUsername(username);
 
         if (user == null)
             return AuthResponseDTO.userNotFound();
