@@ -1,8 +1,10 @@
-<h2>User Details</h2>
+<h2>Nutzer Details</h2>
+
+<button class="return-button" routerLink="/users">&lt;</button>
 
 <div class="component-box user-details">
     @if (user) {
-        <h2>#{{ userId }}</h2>
+        <h2>#{{ user.id }}</h2>
         <h1>{{ user.username }}</h1>
         <div class="vline"></div>
 
@@ -13,10 +15,22 @@
                     <span>{{ user.email }}</span>
                 </li>
             }
-            @if (user.roleIds) {
+            @if (user.permissions && user.permissions.length > 0) {
                 <li>
-                    <h1>Rollen</h1>
-                    <span>{{ user.roleIds }}</span>
+                    <h1>Berechtigungen</h1>
+                    <span>
+                        @for (permission of user.permissions; track permission) {
+                            <span>{{ permission.replace("_", " ").toLowerCase() }}</span><br>
+                        }
+                    </span>
+                </li>
+            }
+            @if (creator) {
+                <li>
+                    <h1>Erstellt von</h1>
+                    <div routerLink="/user/{{ creator.id }}" class="clickable">
+                        <span>{{ creator.username }}</span>
+                    </div>
                 </li>
             }
             @if (user.createdAt) {
@@ -31,12 +45,36 @@
                     <span>{{ user.updatedAt | date:'dd.MM.yyyy HH:mm' }}</span>
                 </li>
             }
-            @if (user.refreshVersion) {
+            @if (user.refreshVersion != null) {
                 <li>
                     <h1>Refresh Version</h1>
                     <span>{{ user.refreshVersion }}</span>
                 </li>
             }
+            @if (user.loginEnabled !== undefined && user.loginEnabled !== null) {
+                <li>
+                    <h1>Login Erlaubt</h1>
+                    <span>
+                        @if (user.loginEnabled) {
+                            Ja
+                        }
+                        @else {
+                            Nein
+                        }
+                    </span>
+                </li>
+            }
         </ul>
+
+        @if (authService.hasPermission('UPDATE_USER') || authService.getId() === user.id) {
+            <div>
+                <a routerLink="/edit-user/{{ user.id }}">bearbeiten</a>
+            </div>
+        }
+        @if (authService.hasPermission('DELETE_USER') || authService.getId() === user.id) {
+            <div>
+                <a (click)="deleteUser()">löschen</a>
+            </div>
+        }
     }
 </div>

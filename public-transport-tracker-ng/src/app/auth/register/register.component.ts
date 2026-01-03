@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { fieldsEqual } from '../../core/fields-equal.validator';
 
 @Component({
     selector: 'app-register',
@@ -15,10 +16,12 @@ import { AuthService } from '../auth.service';
 })
 export class RegisterComponent {
 
-    form!: FormGroup;
+    public form!: FormGroup;
+    
+    public loading = false;
+    public error?: string;
 
-    loading = false;
-    error?: string;
+    private passwordMatchValidator: ValidatorFn = fieldsEqual('password', 'passwordConfirm');
 
     constructor(
         private fb: FormBuilder,
@@ -28,11 +31,14 @@ export class RegisterComponent {
         this.form = this.fb.nonNullable.group({
             username: ['', [Validators.required, Validators.maxLength(24)]],
             email: ['', [Validators.required, Validators.email, Validators.maxLength(127)]],
-            password: ['', [Validators.required, Validators.maxLength(255)]]
+            password: ['', [Validators.required, Validators.maxLength(255), Validators.minLength(4)]],
+            passwordConfirm: ['', [Validators.required, Validators.maxLength(255), Validators.minLength(4)]]
         });
+
+        this.form.addValidators(this.passwordMatchValidator);
     }
 
-    register(): void {
+    public register(): void {
         if (this.form.invalid) {
             return;
         }

@@ -14,7 +14,6 @@ export const routes: Routes = [
     },
     {
         path: '',
-        canActivate: [AuthGuard],
         loadComponent: () => import('./app')
             .then(m => m.App)
     },
@@ -25,10 +24,22 @@ export const routes: Routes = [
             .then(c => c.UsersComponent)
     },
     {
-        path: 'users/:id',
+        path: 'user/:id',
         canActivate: [AuthGuard],
         loadComponent: () => import('./user/user-details/user-details.component')
             .then(c => c.UserDetailsComponent)
+    },
+    {
+        path: 'edit-user/:id',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./user/edit-user/edit-user.component')
+            .then(c => c.EditUserComponent)
+    },
+    {
+        path: 'create-user',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./user/create-user/create-user.component')
+            .then(c => c.CreateUserComponent)
     },
     {
         path: 'welcome',

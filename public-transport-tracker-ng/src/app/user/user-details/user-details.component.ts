@@ -1,8 +1,9 @@
 import { DatePipe } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 import { UserService } from "../user.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { IUser } from "../model/user";
+import { AuthService } from "../../auth/auth.service";
 
 @Component({
     selector: 'app-user-details',
@@ -11,31 +12,67 @@ import { IUser } from "../model/user";
     templateUrl: './user-details.component.html',
     styleUrl: './user-details.component.css',
     imports: [
-        DatePipe
+        DatePipe,
+        RouterLink
     ]
 })
 export class UserDetailsComponent implements OnInit {
     
-    @Input() userId?: number;
+    @Input() public userId?: number;
     
-    user?: IUser;
+    public user?: IUser;
+    public creator?: IUser;
+    public error?: string;
 
     constructor(
+        private router: Router,
         private route: ActivatedRoute,
-        private userService: UserService
+        private userService: UserService,
+        public authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        if (!this.userId) {
-            const idFromRoute = this.route.snapshot.paramMap.get('id');
-            if (idFromRoute) {
-                this.userId = Number(idFromRoute);
-            }
-        }
-
+        // if component is embedded
         if (this.userId) {
-            this.userService.getUser(this.userId)
-                .subscribe(data => this.user = data);
+            this.loadUser(this.userId);
         }
+        else {
+            this.route.paramMap.subscribe(params => {
+                const id = params.get('id');
+                if (id) {
+                    this.loadUser(Number(id));
+                }
+            });
+        }
+    }
+
+    private loadUser(id: number) {
+        this.userService.getUser(id).subscribe({
+            next: (user) => {
+                this.user = user;
+                if (user.createdBy !== null) {
+                    this.userService.getUser(user.createdBy!).subscribe({
+                        next: (creator) => {
+                            this.creator = creator;
+                        },
+                        error: (err) => {
+                            // just to prevent error message in console
+                        }
+                    })
+                }
+            },
+            error: (err) => {
+                this.router.navigate(["/users"])
+            }
+        });
+    }
+
+    public deleteUser(): void {
+        this.userService.deleteUser(this.user!.id!).subscribe({
+            next: (res) => {
+                this.router.navigate(['/users']);
+            },
+            error: (err) => {} // dont throw error to console
+        });
     }
 }

@@ -1,6 +1,7 @@
 <h2>Registrieren</h2>
 
 <div class="component-box">
+    
     <form [formGroup]="form" (ngSubmit)="register()">
         <label class="text-input">
             <span>Username</span>
@@ -25,6 +26,15 @@
             <input
                 type="password"
                 formControlName="password"
+                placeholder="password"
+            />
+        </label>
+
+        <label class="text-input" [class.invalid]="form.hasError('fieldsNotEqual')">
+            <span>Passwort bestätigen</span>
+            <input
+                type="password"
+                formControlName="passwordConfirm"
                 placeholder="password"
             />
         </label>

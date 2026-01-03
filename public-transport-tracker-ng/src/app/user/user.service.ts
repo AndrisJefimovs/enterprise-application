@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { IUser } from "./model/user";
@@ -14,11 +14,24 @@ export class UserService {
 
     constructor(private httpClient: HttpClient) {};
 
-    getUsers(): Observable<IUser[]> {
+    public getUsers(): Observable<IUser[]> {
         return this.httpClient.get<IUser[]>(this.api);
     }
 
-    getUser(userId: number): Observable<IUser> {
+    public getUser(userId: number): Observable<IUser> {
         return this.httpClient.get<IUser>(this.api + "/" + String(userId));
     }
+
+    public updateUser(user: IUser): Observable<HttpResponse<IUser>> {
+        return this.httpClient.put<IUser>(this.api + "/" + user.id, user, { observe: 'response' });
+    }
+
+    public createUser(user: IUser): Observable<HttpResponse<IUser>> {
+        return this.httpClient.post<IUser>(this.api, user, { observe: 'response' });
+    }
+
+    public deleteUser(userId: number): Observable<HttpResponse<IUser>> {
+        return this.httpClient.delete<IUser>(this.api + "/" + String(userId), { observe: 'response' });
+    }
+
 }

@@ -1,71 +1,85 @@
-import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import {
+    HttpErrorResponse,
+    HttpHandlerFn,
+    HttpInterceptorFn,
+    HttpRequest
+} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { TokenService } from '../core/token.service';
+import { IAuthResponse } from './model/response';
 
-let isRefreshing = false;
-
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-
-    const tokenService = inject(TokenService);
+export const authInterceptor: HttpInterceptorFn = (
+    req: HttpRequest<any>,
+    next: HttpHandlerFn
+) => {
     const authService = inject(AuthService);
+    const tokenService = inject(TokenService);
     const router = inject(Router);
 
-    if (
-        req.url.endsWith('/auth/register')
-        || req.url.endsWith('/auth/login')
-        || req.url.endsWith('/auth/refresh')
-    ) {
+    // prevent refresh loop
+    if (req.url.includes('/auth/refresh')) {
         return next(req);
     }
 
-    const token = tokenService.getToken();
+    const accessToken = tokenService.getToken();
 
-    const authReq = token
-        ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    const authReq = accessToken
+        ? req.clone({
+            setHeaders: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
         : req;
 
     return next(authReq).pipe(
-        catchError(err => {
-
-            if (err.status !== 401) {
-                return throwError(() => err);
+        catchError((error: HttpErrorResponse) => {
+            if (error.status !== 401) {
+                return throwError(() => error);
             }
 
-            if (isRefreshing) {
-                return throwError(() => err);
+            const refreshToken = tokenService.getRefreshToken();
+
+            if (!refreshToken) {
+                tokenService.clear();
+                router.navigate(['/login']);
+                return throwError(() => error);
             }
 
-            isRefreshing = true;
-
+            // try refresh
             return authService.refreshToken().pipe(
-                switchMap(res => {
-                    isRefreshing = false;
-
-                    if (res.statusCode === 0) {
-                        tokenService.saveTokens(res.token!, res.refreshToken!);
-
-                        return next(
-                            authReq.clone({
-                                setHeaders: {
-                                    Authorization: `Bearer ${res.token}`
-                                }
-                            })
-                        );
+                switchMap((response: IAuthResponse) => {
+                    // Business-Fehler trotz HTTP 200
+                    if (response.statusCode !== 0 || !response.token) {
+                        tokenService.clear();
+                        router.navigate(['/login']);
+                        return throwError(() => error);
                     }
 
-                    authService.logout();
-                    router.navigate(['/login']);
-                    return throwError(() => err);
+                    // save new tokens
+                    tokenService.saveTokens(
+                        response.token,
+                        response.refreshToken!
+                    );
+
+                    // retry original request
+                    const retryReq = req.clone({
+                        setHeaders: {
+                        Authorization: `Bearer ${response.token}`
+                        }
+                    });
+
+                    return next(retryReq);
                 }),
-                catchError(refreshErr => {
-                    isRefreshing = false;
-                    authService.logout();
-                    router.navigate(['/login']);
-                    return throwError(() => refreshErr);
+                catchError((error: HttpErrorResponse) => {
+                    if (error.status === 401) {
+                        authService.logout();
+                        router.navigate(['/login']);
+                    }
+                    return throwError(() => error);
                 })
             );
         })

@@ -55,13 +55,30 @@ button:hover {
 }
 
 .dark-button {
-    background-color: #003030;
+    background-color: #203535;
     color: white;
 }
 
 .dark-button:hover {
     background-color: #000000;
     color: white;
+}
+
+.return-button {
+    position: sticky;/*fixed;*/
+    top: 64px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    font-size: 20px;
+    text-align: center;
+    background-color: #f8f8f8;
+    border-color: #dedede;
+    visibility: visible;
+}
+
+.return-button:hover {
+    background-color: #e8e8e8;
 }
 
 .h1-wrapper {
@@ -98,11 +115,22 @@ form > p {
 }
 
 a {
-    color: #003030;
+    color: #203535;
+    cursor: pointer;
+    text-decoration: none;
 }
 
 a:hover {
     color: black;
+    cursor: pointer;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}
+
+.error {
+    color: red;
 }
 
 .text-input {
@@ -123,13 +151,17 @@ a:hover {
     padding-right: 20px;
 }
 
+.text-input.invalid input {
+  border-color: var(--error-color, #d32f2f);
+}
+
 /* mark invalid inputs red */
 input.ng-invalid.ng-touched {
-    border-color: #b80000;
-    color: #b80000;
+    border-color: #d32f2f;
+    color: #d32f2f;
 }
 input.ng-invalid.ng-touched::placeholder {
-    color: #b80000;
+    color: #d32f2f;
 }
 
 .radio-group-wrapper > span {
@@ -166,7 +198,7 @@ input.ng-invalid.ng-touched::placeholder {
 }
 
 .radio-group label:has(> input:checked) {
-    background-color: #003030;
+    background-color: #203535;
     color: white;
 }
 
@@ -208,7 +240,7 @@ ul li {
 }
 
 ul li:hover {
-    background-color: #003030;
+    background-color: #203535;
     color: white;
 }
 
@@ -264,6 +296,18 @@ app-user-details {
     flex-direction: column;
 }
 
+app-edit-user {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-create-user {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 @media (min-width: 600px) {
     div.component-box {
         margin-top: 0;
@@ -276,6 +320,10 @@ app-user-details {
 
         margin-top: auto;
         margin-bottom: 20px;
+    }
+
+    .return-button {
+        visibility: hidden;
     }
 }
 

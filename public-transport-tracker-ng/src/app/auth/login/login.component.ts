@@ -82,11 +82,17 @@ export class LoginComponent implements OnInit {
 
         this.authService.login(this.form.getRawValue())
             .subscribe({
-                next: () => {
+                next: (res) => {
                     this.loading = false;
-                    this.router.navigate(['/']);
+                    switch (res.statusCode) {
+                        case 0:
+                            this.router.navigate(['/']);
+                            break;
+                        default:
+                            this.error = 'Login fehlgeschlagen';
+                    }
                 },
-                error: () => {
+                error: (err) => {
                     this.loading = false;
                     this.error = 'Login fehlgeschlagen';
                 }
