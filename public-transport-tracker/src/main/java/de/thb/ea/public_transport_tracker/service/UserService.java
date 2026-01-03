@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import de.thb.ea.public_transport_tracker.entity.Role;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.repository.UserRepository;
 
@@ -113,28 +112,6 @@ public class UserService implements UserDetailsService {
         return user.get();
     }
 
-
-    /**
-     * This method returns a list of users that have a specified role.
-     * 
-     * @param roleName
-     * @return List of users. If no role with given name exists an empty list is returned.
-     */
-    public List<User> getUsersByRole(String roleName) {
-        return userRepository.findByRoles_Name(roleName);
-    }
-
-    /**
-     * Get a list of users that have the given role.
-     * 
-     * @param role
-     * @return List of users.
-     */
-    public List<User> getUsersByRole(Role role) {
-        return userRepository.findByRoles(role);
-    } 
-
-
     /**
      * This function tries to add an user to the repository.
      * 
@@ -170,8 +147,12 @@ public class UserService implements UserDetailsService {
         if (user == null)
             return null;
         try {
-            if (userIdExists(user.getId()))
+            User oldUser = getUserById(user.getId());
+            if (oldUser != null) {
+                if (user.getPassword() != null && !user.getPassword().equals(oldUser.getPassword()))
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
                 user = userRepository.save(user);
+            }
         }
         catch (Exception e) {
             return null;
@@ -250,6 +231,20 @@ public class UserService implements UserDetailsService {
         if (updateUser(user) == null)
             return null;
         return user.getRefreshVersion();
+    }
+
+    /**
+     * Check if user with id has username.
+     * 
+     * @param id
+     * @param username
+     * @return true if the user with id has the username.
+     */
+    public boolean isIdOfUser(Long id, String username) {
+        User user = getUserById(id);
+        if (user == null)
+            return false;
+        return user.getUsername().equals(username);
     }
 
 }

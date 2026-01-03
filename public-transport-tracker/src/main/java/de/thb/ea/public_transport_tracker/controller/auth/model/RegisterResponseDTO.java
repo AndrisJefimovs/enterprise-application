@@ -1,5 +1,6 @@
 package de.thb.ea.public_transport_tracker.controller.auth.model;
 
+import de.thb.ea.public_transport_tracker.controller.auth.model.enums.StatusCode;
 import lombok.Builder;
 import lombok.Data;
 

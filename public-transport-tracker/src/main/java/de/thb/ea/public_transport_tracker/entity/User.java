@@ -20,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,24 +43,30 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(unique = true, length = 24, nullable = false)
+    @Setter
     private String username;
 
     @Column(unique = true, length = 127, nullable = false)
+    @Setter
     private String email;
 
-    @Column(length = 255, nullable = false)
+    @Column(length = 255)
     @Setter
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_roles",
+        name = "user_permissions",
         joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
+        inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     @Setter
     @Default
-    private Set<Role> roles = new HashSet<>();
+    private Set<Permission> permissions = new HashSet();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id", updatable = false)
+    private User createdBy;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -74,6 +81,11 @@ public class User implements UserDetails {
     @Setter
     private Integer refreshVersion = 0;
 
+    @Column(name = "login_enabled")
+    @Setter
+    @Default
+    private Boolean loginEnabled = true;
+
 
     /**
      * This method can be used to ensure that the user object has no id. This way a new id is
@@ -83,18 +95,6 @@ public class User implements UserDetails {
         id = null;
     }
 
-
-    /**
-     * Check if user has a specific role.
-     * 
-     * @param role
-     * @return true if it has the role; otherwise false.
-     */
-    public boolean hasRole(Role role) {
-        return roles.contains(role);
-    }
-
-
     /**
      * Check if user has a specific permission.
      * 
@@ -102,13 +102,8 @@ public class User implements UserDetails {
      * @return true if it has the permission; otherwise false.
      */
     public boolean hasPermission(Permission permission) {
-        for (Role role : roles) {
-            if (role.hasPermission(permission))
-                return true;
-        }
-        return false;
+        return permissions.contains(permission);
     }
-
 
     /**
      * This function returns all granted authorities of a user. Granted authorities can either be
@@ -119,15 +114,10 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : roles) {
-            // add role authority
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-            for (Permission permission : role.getPermissions()) {
-                // add permission authority
-                authorities.add(new SimpleGrantedAuthority("PERM_" + permission.getName()));
-            }
+        // add permission authority
+        for (Permission permission : permissions) {
+            authorities.add(new SimpleGrantedAuthority("PERM_" + permission.getName()));
         }
-
         return authorities;
     }
 
@@ -154,5 +144,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isLoginEnabled() {
+        return loginEnabled && password != null;
     }
 }

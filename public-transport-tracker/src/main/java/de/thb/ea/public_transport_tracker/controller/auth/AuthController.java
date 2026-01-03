@@ -1,8 +1,5 @@
 package de.thb.ea.public_transport_tracker.controller.auth;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,18 +17,16 @@ import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterRequestD
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterResponseDTO;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
-import de.thb.ea.public_transport_tracker.service.RoleService;
 import de.thb.ea.public_transport_tracker.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/auth/")
+@RequestMapping("/auth")
 @AllArgsConstructor
 public class AuthController {
 
     private final UserService userService;
-    private final RoleService roleService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
@@ -54,7 +49,6 @@ public class AuthController {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(request.getPassword())
-                .roles(new HashSet<>(Arrays.asList(roleService.getRoleByName("USER"))))
                 .build()
         );
 
@@ -89,8 +83,7 @@ public class AuthController {
         if (user == null)
             return AuthResponseDTO.userNotFound();
 
-        // return forbidden when login is disabled
-        if (user.getPassword() == null)
+        if (!user.isLoginEnabled())
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         Authentication authentication = authenticationManager.authenticate(
@@ -128,7 +121,7 @@ public class AuthController {
             username = jwtService.extractUsername(request.getRefreshToken());
         }
         catch (ExpiredJwtException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return AuthResponseDTO.invalidRefreshToken();
         }
 
         User user = userService.getUserByUsername(username);

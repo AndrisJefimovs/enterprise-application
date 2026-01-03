@@ -1,5 +1,6 @@
 package de.thb.ea.public_transport_tracker.controller.auth.model;
 
+import de.thb.ea.public_transport_tracker.controller.auth.model.enums.StatusCode;
 import lombok.Builder;
 import lombok.Data;
 
@@ -37,6 +38,13 @@ public class AuthResponseDTO {
         return AuthResponseDTO.builder()
                 .statusCode(StatusCode.INVALID_CREDENTIALS.index())
                 .statusMessage("Invalid credentials.")
+                .build();
+    }
+
+    public static AuthResponseDTO invalidRefreshToken() {
+        return AuthResponseDTO.builder()
+                .statusCode(StatusCode.INVALID_REFRESH_TOKEN.index())
+                .statusMessage("Invalid refresh token.")
                 .build();
     }
 }

@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.
     AuthenticationConfiguration;
+    import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     private final JwtAuthFilter jwtAuthFilter;
@@ -39,9 +40,6 @@ public class SecurityConfig {
 
             // endpoints
             .authorizeHttpRequests(auth -> auth
-                // allow CORS preflight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
                 // public endpoints
                 .requestMatchers("/auth/**").permitAll()
 

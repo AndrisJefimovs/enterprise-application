@@ -140,5 +140,6 @@ Status codes are numeric values that represent a specific status. It can be used
 | 2           | Email Already Taken         |
 | 3           | User Not Found              |
 | 4           | Invalid Credentials         |
+| 5           | Invalid Refresh Token       |
 
 In the backend the `Status Codes` are represented as a enumeration.

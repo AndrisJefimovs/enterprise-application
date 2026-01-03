@@ -21,6 +21,11 @@ public class PermissionService {
         this.permissionRepository = permissionRepository;
     }
 
+    /**
+     * Return list of all permissions.
+     * 
+     * @return List of permissions
+     */
     public List<Permission> getAllPermissions() {
         return (List<Permission>) permissionRepository.findAll();
     }

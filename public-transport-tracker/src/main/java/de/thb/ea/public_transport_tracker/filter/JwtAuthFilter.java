@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import de.thb.ea.public_transport_tracker.service.JwtService;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +24,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/auth");
+    }
 
     @Override
     protected void doFilterInternal(
@@ -58,9 +63,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         }
-        catch (ExpiredJwtException ex) {
+        catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
-        
+        }   
     }
+
+
 }
