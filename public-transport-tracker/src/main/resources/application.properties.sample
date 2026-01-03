@@ -26,5 +26,6 @@ security.jwt.expiration-time=900000
 security.jwt.refresh-expiration-time=86400000
 
 # Application configuration
-application.users.admin.username=admin
-application.users.admin.password=password
+application.admin.username=admin
+application.admin.password=password
+application.admin.email=admin@local
