@@ -1,0 +1,30 @@
+# This is an example file for the application.properties file.
+# To run the application you have to replace the sections of the form <PARAM> with your personal
+# parameters (i.e database user and passwords) and remove the '.sample' from the filename.
+
+spring.application.name=public-transport-tracker
+
+# general server
+server.address=localhost
+server.port=8080
+
+# PostgreSQL database configuration
+spring.datasource.url=jdbc:postgresql://<DB_DOMAIN>:5432/<DB_NAME>
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.username=<DB_USER>
+spring.datasource.password=<DB_PASSWORD>
+
+# Hibernate properties
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.open-in-view=false
+
+# JWT configuration
+security.jwt.secret-key=<SECRET_KEY>
+# 15 minutes in milliseconds
+security.jwt.expiration-time=900000
+# one day in milliseconds
+security.jwt.refresh-expiration-time=86400000
+
+# Application configuration
+application.users.admin.username=admin
+application.users.admin.password=password

@@ -1,0 +1,343 @@
+/* You can add global styles to this file, and also import other style files */
+* {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    display: table-cell;
+    vertical-align: middle;
+    font-size: clamp(26px, 4vw, 40px);
+    text-align: left;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+h1 > hr {
+    border: none;
+    height: 8px;
+    width:  clamp(50px, 10vw, 120px);
+    margin-left: 0px;
+    margin-right: auto;
+    margin-top: 20px;
+    background-color: #000000;
+}
+
+h2 {
+    font-size: clamp(26px, 3.5vw, 36px);
+    margin-top: 24px;
+    margin-left: 24px;
+}
+
+button {
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 10px;
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: #dadada;
+}
+
+button:hover {
+    background-color: #c8c8c8;
+}
+
+.dark-button {
+    background-color: #203535;
+    color: white;
+}
+
+.dark-button:hover {
+    background-color: #000000;
+    color: white;
+}
+
+.return-button {
+    position: sticky;/*fixed;*/
+    top: 64px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    font-size: 20px;
+    text-align: center;
+    background-color: #f8f8f8;
+    border-color: #dedede;
+    visibility: visible;
+}
+
+.return-button:hover {
+    background-color: #e8e8e8;
+}
+
+.h1-wrapper {
+    display: grid;
+    align-items: center;
+}
+
+.component-box {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 24px;
+    margin-right: 24px;
+    padding: 24px;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+form > label {
+    flex: 1;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+form > p {
+    text-align: center;
+}
+
+a {
+    color: #203535;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+a:hover {
+    color: black;
+    cursor: pointer;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}
+
+.error {
+    color: red;
+}
+
+.text-input {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-input > span {
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.text-input > input {
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    padding: 12px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.text-input.invalid input {
+  border-color: var(--error-color, #d32f2f);
+}
+
+/* mark invalid inputs red */
+input.ng-invalid.ng-touched {
+    border-color: #d32f2f;
+    color: #d32f2f;
+}
+input.ng-invalid.ng-touched::placeholder {
+    color: #d32f2f;
+}
+
+.radio-group-wrapper > span {
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: row;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.radio-group > label {
+    flex: 1;
+    border: 1px solid black;
+    border-radius: 8px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding: 5px;
+    text-align: center;
+    background-color: #f8f8f8;
+}
+
+.radio-group label:first-child {
+    margin-left: 0px;
+}
+
+.radio-group label:last-child {
+    margin-right: 0px;
+}
+
+.radio-group label:has(> input:checked) {
+    background-color: #203535;
+    color: white;
+}
+
+.radio-group label:has(> input:not(:checked)):hover {
+    background-color: #dadada;
+}
+
+.radio-group input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+div.vline {
+    background-color: #dedede;
+    height: 1px;
+}
+
+ul {
+    list-style-type: none;
+    padding-inline-start: 0px;
+}
+
+ul > div.vline:last-child {
+    display: none;
+}
+
+ul > div.vline {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+ul li {
+    border-radius: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ul li:hover {
+    background-color: #203535;
+    color: white;
+}
+
+ul li h1 {
+    padding: 0px;
+    font-size: 18px;
+}
+
+.component-box-list {
+    padding: 10px;
+}
+
+#footer-wrapper {
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+}
+
+app-root {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-login {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-register {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-users {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-user-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-edit-user {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+app-create-user {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 600px) {
+    div.component-box {
+        margin-top: 0;
+        margin-left: 18vw;
+        margin-right: 18vw;
+    }
+
+    h2 {
+        margin-left: 18vw;
+
+        margin-top: auto;
+        margin-bottom: 20px;
+    }
+
+    .return-button {
+        visibility: hidden;
+    }
+}
+
+@media (min-width: 1200px) {
+    div.component-box {
+        margin-left: 25vw;
+        margin-right: 25vw;
+    }
+
+    h2 {
+        margin-left: 25vw;
+
+        margin-top: auto;
+        margin-bottom: 20px;
+    }
+}
+

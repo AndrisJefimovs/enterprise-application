@@ -1,0 +1,104 @@
+<h2>Nutzer Bearbeiten</h2>
+
+<button class="return-button" routerLink="/users">&lt;</button>
+
+<div class="component-box edit-user">
+    @if (user) {
+        <h2>#{{ user.id }}</h2>
+        <h1>{{ user.username }}</h1>
+        <div class="vline"></div>
+    }
+
+    @if (form) {
+        <form [formGroup]="form" (ngSubmit)="update()">
+            <label class="text-input">
+                <span>Username</span>
+                <input
+                    type="text"
+                    formControlName="username"
+                    placeholder="user"
+                />
+            </label>
+
+            <label class="text-input">
+                <span>Email-Adresse</span>
+                <input
+                    type="email"
+                    formControlName="email"
+                    placeholder="user@email.net"
+                />
+            </label>
+
+            @if (!showPasswordFields) {
+                <a class="clickable" (click)="enablePasswordChange()">
+                    Passwort ändern
+                </a>
+            }
+            @else {
+                <label class="text-input">
+                    <span>Neues Passwort</span>
+                    <input
+                        type="password"
+                        formControlName="password"
+                        placeholder="password"
+                    />
+                </label>
+
+                <label class="text-input" [class.invalid]="form.hasError('fieldsNotEqual')">
+                    <span>Neues Passwort bestätigen</span>
+                    <input
+                        type="password"
+                        formControlName="passwordConfirm"
+                        placeholder="password"
+                    />
+                </label>
+
+                <a class="clickable" (click)="disablePasswordChange()">
+                    Passwort doch nicht ändern
+                </a>
+            }
+            @if (allPermissions.length > 0) {
+                <div class="permissions-wrapper">
+                    <span>Berechtigungen</span>
+
+                    <ul formArrayName="permissions" class="permissions">
+                        @for (perm of allPermissions; track $index; let i = $index) {
+                            <li>
+                                <label class="permission-item">
+                                    <input type="checkbox" [formControlName]="i">
+                                    <span>{{ perm }}</span>
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="permissions-wrapper">
+                <span>Web Login</span>
+
+                <ul class="permissions">
+                    <li>
+                        <label class="permission-item">
+                            <input type="checkbox" formControlName="loginEnabled">
+                            <span>Erlaubt</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <button class="dark-button" type="submit" [disabled]="loading">
+                {{ loading ? 'Bitte warten…' : 'Speichern' }}
+            </button>
+
+            <button type="button" [disabled]="loading" (click)="reset()">
+                {{ loading ? 'Bitte warten…' : 'Zurücksetzen' }}
+            </button>
+        
+            @if (error) {
+                <p class="error">{{ error }}</p>
+            }
+        </form>
+    }
+    
+</div>

@@ -1,0 +1,55 @@
+<h2>Registrieren</h2>
+
+<div class="component-box">
+    
+    <form [formGroup]="form" (ngSubmit)="register()">
+        <label class="text-input">
+            <span>Username</span>
+            <input
+                type="text"
+                formControlName="username"
+                placeholder="user"
+            />
+        </label>
+
+        <label class="text-input">
+            <span>Email-Adresse</span>
+            <input
+                type="email"
+                formControlName="email"
+                placeholder="deine@email.net"
+            />
+        </label>
+
+        <label class="text-input">
+            <span>Passwort</span>
+            <input
+                type="password"
+                formControlName="password"
+                placeholder="password"
+            />
+        </label>
+
+        <label class="text-input" [class.invalid]="form.hasError('fieldsNotEqual')">
+            <span>Passwort bestätigen</span>
+            <input
+                type="password"
+                formControlName="passwordConfirm"
+                placeholder="password"
+            />
+        </label>
+        
+        <button class="dark-button" type="submit" [disabled]="loading">
+            {{ loading ? 'Bitte warten…' : 'Registrieren' }}
+        </button>
+      
+        @if (error) {
+            <p style="color:red">{{ error }}</p>
+        }
+
+        <p>
+            <a routerLink="/login">Zurück zum Login</a>
+        </p>
+    </form>
+
+</div>

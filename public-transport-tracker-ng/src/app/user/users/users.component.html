@@ -1,0 +1,30 @@
+<h2>Nutzer</h2>
+
+<button class="return-button" routerLink="/">&lt;</button>
+
+<div class="component-box component-box-list">
+    @if (authService.hasPermission('CREATE_USER')) {
+        <div>
+            <a routerLink="/create-user">Nutzer erstellen</a>
+        </div>
+    }
+    <ul>
+        @for (user of users; track user.id) {
+            <li>
+                <div class="user-functions">
+                    @if (authService.hasPermission('UPDATE_USER') || user.id == authService.getId()) {
+                        <span class="clickable" routerLink="/edit-user/{{ user.id }}">bearbeiten</span>
+                    }
+                    @if (authService.hasPermission('DELETE_USER') || user.id == authService.getId()) {
+                        <span class="clickable" (click)="delete(user.id!)">löschen</span>
+                    }
+                </div>
+                <div routerLink="/user/{{ user.id }}">
+                    <h1>{{ user.username }}</h1>
+                    <span>{{ user.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                </div>
+            </li>
+            <div class="vline"></div>
+        }
+    </ul>
+</div>

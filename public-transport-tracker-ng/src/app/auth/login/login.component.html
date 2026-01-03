@@ -1,0 +1,55 @@
+<h2>Anmeldung</h2>
+
+<button class="return-button" routerLink="/welcome">&lt;</button>
+
+<div class="component-box">
+    <form [formGroup]="form" (ngSubmit)="login()">
+        <div class="radio-group-wrapper">
+            <span>Wie wollen Sie sich anmelden?</span>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" value="username" formControlName="identifierType">
+                    <span>Username</span>
+                </label>
+                <label>
+                    <input type="radio" value="email" formControlName="identifierType">
+                    <span>Email</span>
+                </label>
+            </div>
+        </div>
+
+        <label class="text-input">
+            <span>{{ label }}</span>
+            <input
+                type="{{ inputType }}"
+                formControlName="identifier"
+                placeholder="{{ placeholder }}"
+            />
+        </label>
+        
+        <label class="text-input">
+            <span>Passwort</span>
+            <input
+                type="password"
+                formControlName="password"
+                placeholder="Passwort"
+            />
+        </label>
+        
+      
+        <button class="dark-button" type="submit" [disabled]="loading">
+            {{ loading ? 'Bitte warten…' : 'Login' }}
+        </button>
+      
+        @if (error) {
+            <p style="color:red">{{ error }}</p>
+        }
+
+        <p>
+            <a routerLink="/register">Noch kein Account? Registrieren</a>
+        </p>
+    </form>
+
+</div>
+
+
