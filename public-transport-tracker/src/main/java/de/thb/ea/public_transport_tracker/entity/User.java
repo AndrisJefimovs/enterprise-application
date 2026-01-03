@@ -1,7 +1,7 @@
 package de.thb.ea.public_transport_tracker.entity;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,11 +70,11 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
-    private Date createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @Default
     @Column(name = "refresh_version")

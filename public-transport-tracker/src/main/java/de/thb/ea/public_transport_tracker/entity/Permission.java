@@ -25,9 +25,9 @@ public class Permission {
 
     @Column(nullable = false, length = 32, unique = true)
     private String name;
-
+    
     /**
-     * This method can be used to ensure a that the permission object has no id. This way a new id
+     * This method can be used to ensure a that the object has no id. This way a new id
      * is generated when saving it to the repository.
      */
     public void forgetId() {

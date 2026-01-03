@@ -1,6 +1,6 @@
 package de.thb.ea.public_transport_tracker.controller.api.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,8 +21,8 @@ public class UserDTO {
     private String password;
     private Set<String> permissions;
     private Long createdBy;
-    private Date createdAt;
-    private Date updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private Integer refreshVersion;
     private Boolean loginEnabled;
 
