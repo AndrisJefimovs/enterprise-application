@@ -5,8 +5,10 @@
         <ul>
             @for (trip of trips; track trip.id) {
                 <li>
-                    <h1>{{ trip.lineName }} nach {{ trip.direction }}</h1>
+                    <h1>{{ trip.lineName }} [{{ trip.type }}]</h1>
+                    <span>{{ trip.direction }}</span>
                 </li>
+                <div class="vline"></div>
             }
         </ul>
     }
