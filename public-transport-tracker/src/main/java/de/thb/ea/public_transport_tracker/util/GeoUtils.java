@@ -38,8 +38,8 @@ public class GeoUtils {
         double eastLon = centerLon + lonDelta;
 
         return new BoundingBox(
-            new GeoLocation(northLat, westLon),
-            new GeoLocation(southLat, eastLon)
+            new Location(northLat, westLon),
+            new Location(southLat, eastLon)
         );
     }
 

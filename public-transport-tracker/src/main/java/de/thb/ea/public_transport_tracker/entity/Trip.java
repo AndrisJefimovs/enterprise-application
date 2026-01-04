@@ -12,9 +12,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Getter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -35,6 +37,10 @@ public class Trip {
     @Column(length = 16)
     @Setter
     private String lineName;
+
+    @Column(length = 32)
+    @Setter
+    private String type;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

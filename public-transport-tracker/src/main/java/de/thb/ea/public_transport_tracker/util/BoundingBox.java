@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BoundingBox {
     
-    GeoLocation northWest;
-    GeoLocation southEast;
+    Location northWest;
+    Location southEast;
 
 }
