@@ -26,6 +26,9 @@ security.jwt.expiration-time=900000
 security.jwt.refresh-expiration-time=86400000
 
 # Application configuration
-application.admin.username=admin
-application.admin.password=password
-application.admin.email=admin@local
+application.admin.username=<ADMIN_NAME>
+application.admin.password=<ADMIN_PASSWORD>
+application.admin.email=<ADMIN_EMAIL>
+
+# just for https reverse proxy (actually not needed right now)
+server.forward-headers-strategy=native
