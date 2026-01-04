@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,14 +23,24 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+    name = "trips",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"remote_id", "remote_origin"})
+    }
+)
 public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, length = 32, nullable = false)
+    @Column(length = 32, nullable = false, name = "remote_id")
     @Setter
-    private String tripId;
+    private String remoteId;
+
+    @Column(length = 16, nullable = false, name = "remote_origin")
+    @Setter
+    private String remoteOrigin;
 
     @Column(length = 64)
     @Setter

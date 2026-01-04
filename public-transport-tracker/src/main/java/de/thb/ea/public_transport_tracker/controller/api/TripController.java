@@ -30,7 +30,7 @@ public class TripController {
         if (latitude == null || longitude == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        List<Trip> trips = tripService.getNearbyTrips(latitude, longitude, 500);
+        List<Trip> trips = tripService.getNearbyTrips(latitude, longitude, 500, 64);
 
         if (trips == null)
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);

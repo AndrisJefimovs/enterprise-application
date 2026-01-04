@@ -10,6 +10,6 @@ import de.thb.ea.public_transport_tracker.entity.Trip;;
 @Repository
 public interface TripRepository extends CrudRepository<Trip, Long>  {
     
-    Optional<Trip> findByTripId(String tripId);
+    Optional<Trip> findTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId);
 
 }
