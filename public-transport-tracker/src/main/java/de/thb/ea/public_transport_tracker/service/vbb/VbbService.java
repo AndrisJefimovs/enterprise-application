@@ -43,8 +43,15 @@ public class VbbService {
                     .encode()
                     .toUri();
 
-        ResponseEntity<VbbRadarResponse> response = restTemplate.getForEntity(uri, VbbRadarResponse.class);
-
+        
+        ResponseEntity<VbbRadarResponse> response;
+        
+        try {
+           response = restTemplate.getForEntity(uri, VbbRadarResponse.class);
+        }
+        catch (Exception e) {
+            return null;
+        }
         if (response.getStatusCode() != HttpStatus.OK) {
             return null;
         }

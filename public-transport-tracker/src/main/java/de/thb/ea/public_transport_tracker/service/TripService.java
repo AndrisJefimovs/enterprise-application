@@ -69,8 +69,9 @@ public class TripService {
     public List<Trip> getNearbyTrips(double latitude, double longitude, double radius, int n) {
         List<VbbMovement> movements = vbbService.getNearbyMovements(latitude, longitude, radius, n);
 
-        if (movements == null)
+        if (movements == null) {
             return null;
+        }
 
         List<Trip> trips = new ArrayList<>();
         for (VbbMovement movement : movements) {
