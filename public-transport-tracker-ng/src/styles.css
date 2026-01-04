@@ -308,6 +308,12 @@ app-create-user {
     flex-direction: column;
 }
 
+app-nearby-trips {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 @media (min-width: 600px) {
     div.component-box {
         margin-top: 0;

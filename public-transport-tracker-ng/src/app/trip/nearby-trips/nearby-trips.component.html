@@ -1,0 +1,16 @@
+<h2>Fahrzeuge in der Nähe</h2>
+
+<div class="component-box">
+    @if (trips && trips.length > 0) {
+        <ul>
+            @for (trip of trips; track trip.id) {
+                <li>
+                    <h1>{{ trip.lineName }} nach {{ trip.direction }}</h1>
+                </li>
+            }
+        </ul>
+    }
+    @else {
+        Es wurden keine Fahrzeuge in deiner Umgebung gefunden.
+    }
+</div>

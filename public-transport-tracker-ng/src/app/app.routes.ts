@@ -45,5 +45,10 @@ export const routes: Routes = [
         path: 'welcome',
         loadComponent: () => import('./welcome/welcome.component')
             .then(c => c.LoginComponent)
+    },
+    {
+        path: 'nearby',
+        loadComponent: () => import('./trip/nearby-trips/nearby-trips.component')
+            .then(c => c.NearbyTripsComponent)
     }
 ];

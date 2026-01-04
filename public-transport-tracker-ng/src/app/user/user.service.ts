@@ -8,7 +8,7 @@ import { IUser } from "./model/user";
 })
 export class UserService {
 
-    private readonly API: string = "http://localhost:8080/api/v1/users"
+    private readonly API: string = "https://ptt.emx-studios.dev/api/v1/users"
 
     private users: IUser[] = []
 

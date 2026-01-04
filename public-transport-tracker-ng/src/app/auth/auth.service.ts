@@ -14,7 +14,7 @@ const USER_ID_KEY: string = 'USER_ID';
 })
 export class AuthService {
   
-    private readonly API: string = 'http://localhost:8080/auth';
+    private readonly API: string = 'https://ptt.emx-studios.dev/auth';
 
     private userSubject = new BehaviorSubject<IUser|null>(null);
     readonly user$ = this.userSubject.asObservable();
