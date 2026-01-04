@@ -25,10 +25,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
+    /**
+     * For some reason the filter is being executed a after the request is being computed.
+     * This function prevents the filter from filtering when i dont expect a authorization token.
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/auth");
+        return path.startsWith("/auth") || path.startsWith("/api/v1/trips/nearby");
     }
 
     @Override
@@ -43,7 +47,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username = null;
 
         try {
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            if (authHeader == null)
+                throw new NullPointerException();
+            
+            if (authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7); // cut of "Bearer "-prefix
                 username = jwtService.extractUsername(token);
             }
