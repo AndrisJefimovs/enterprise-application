@@ -99,7 +99,8 @@ button:hover {
 }
 
 .component-box-list {
-    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 form {
