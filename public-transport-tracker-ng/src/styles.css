@@ -98,6 +98,10 @@ button:hover {
     flex-direction: column;
 }
 
+.component-box-list {
+    padding: 10px;
+}
+
 form {
     flex: 1;
     display: flex;
@@ -249,9 +253,6 @@ ul li h1 {
     font-size: 18px;
 }
 
-.component-box-list {
-    padding: 10px;
-}
 
 #footer-wrapper {
     margin-top: auto;
