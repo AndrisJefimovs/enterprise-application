@@ -1,5 +1,6 @@
 package de.thb.ea.public_transport_tracker.service.remote.vbb.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,7 +15,7 @@ import lombok.Setter;
 public class VbbRadarResponse {
     
     @JsonProperty("movements")
-    private List<VbbMovement> movements;
+    private List<VbbMovement> movements = new ArrayList<>();
 
     private Long realtimeDataUpdatedAt;
 
