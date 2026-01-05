@@ -22,10 +22,7 @@ export class LoginComponent implements OnInit {
 
     // navigate to /home when already visited
     ngOnInit(): void {
-        if (this.welcomeService.hasVisited()) {
-            //this.router.navigate(['/home']);
-        }
-        else {
+        if (!this.welcomeService.hasVisited()) {
             this.welcomeService.setVisited();
         }
     }
