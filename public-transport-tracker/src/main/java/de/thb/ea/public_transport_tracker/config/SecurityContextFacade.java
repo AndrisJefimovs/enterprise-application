@@ -15,13 +15,13 @@ public class SecurityContextFacade {
     public UserDetails getUserDetails() {
         Authentication auth = getAuthentication();
         return auth != null
-                ? (UserDetails) auth.getPrincipal()
-                : null;
+            ? (UserDetails) auth.getPrincipal()
+            : null;
     }
 
     public boolean hasAuthority(String authority) {
         Authentication auth = getAuthentication();
-        return auth != null &&
-                auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(authority));
+        return auth != null
+            && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(authority));
     }
 }

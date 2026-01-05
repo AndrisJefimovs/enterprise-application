@@ -32,17 +32,24 @@ public class AuthController {
 
     
     @PostMapping("register")
-    public ResponseEntity<RegisterResponseDTO> postMethodName(@RequestBody RegisterRequestDTO request) {
-        if (request.getEmail() == null ||
-            request.getUsername() == null ||
-            request.getPassword() == null)
+    public ResponseEntity<RegisterResponseDTO> registerNewAccount(
+        @RequestBody RegisterRequestDTO request
+    ) {
+        if (
+            request.getEmail() == null
+            || request.getUsername() == null
+            || request.getPassword() == null
+        ) {
             return ResponseEntity.badRequest().build();
+        }
 
-        if (userService.usernameExists(request.getUsername()))
+        if (userService.usernameExists(request.getUsername())) {
             return ResponseEntity.ok().body(RegisterResponseDTO.usernameAlreadyTaken());
-        
-        if (userService.emailExists(request.getEmail()))
+        }
+
+        if (userService.emailExists(request.getEmail())) {
             return ResponseEntity.ok().body(RegisterResponseDTO.emailAlreadyTaken());
+        }
 
         User user = userService.addNewUser(
             User.builder()
@@ -52,19 +59,23 @@ public class AuthController {
                 .build()
         );
 
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.internalServerError().build();
-            
+        }
+
         return ResponseEntity.ok().body(RegisterResponseDTO.success());
     }
 
 
     @PostMapping("login")
     public ResponseEntity<AuthResponseDTO> authenticateUser(@RequestBody LoginRequestDTO request) {
-        if (request.getIdentifier() == null ||
-            request.getIdentifierType() == null ||
-            request.getPassword() == null)
+        if (
+            request.getIdentifier() == null
+            || request.getIdentifierType() == null
+            || request.getPassword() == null
+        ) {
             return ResponseEntity.badRequest().build();
+        }
 
         User user;
         switch (request.getIdentifierType()) {
@@ -78,11 +89,13 @@ public class AuthController {
                 return ResponseEntity.badRequest().build();
         }
 
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
+        }
 
-        if (!user.isLoginEnabled())
+        if (!user.isLoginEnabled()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -95,24 +108,26 @@ public class AuthController {
             String token = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
-            if (token == null || refreshToken == null)
+            if (token == null || refreshToken == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
 
             return ResponseEntity.ok().body(
                 AuthResponseDTO.success(user.getId(), token, refreshToken)
             );
         }
-            
         
         return ResponseEntity.ok().body(AuthResponseDTO.invalidCredentials());
     }
 
 
     @PostMapping("refresh")
-    public ResponseEntity<AuthResponseDTO> reauthenticateUser(@RequestBody RefreshRequestDTO request) {
-        
-        if (request.getRefreshToken() == null)
+    public ResponseEntity<AuthResponseDTO> reauthenticateUser(
+        @RequestBody RefreshRequestDTO request
+    ) { 
+        if (request.getRefreshToken() == null) {
             return ResponseEntity.badRequest().build();
+        }
 
         String username;
 
@@ -125,15 +140,17 @@ public class AuthController {
 
         User user = userService.getUserByUsername(username);
 
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
+        }
 
         if (jwtService.validateRefreshToken(request.getRefreshToken(), user)) {
             String token = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
-            if (token == null || refreshToken == null)
+            if (token == null || refreshToken == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
 
             return ResponseEntity.ok().body(
                 AuthResponseDTO.success(user.getId(), token, refreshToken)

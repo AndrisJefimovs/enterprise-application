@@ -32,23 +32,29 @@ public class AuthorizationService {
     }
 
     public boolean canReadUser(Long userId) {
-        return hasPermission("READ_USER") ||
-               hasId(userId);
+        return hasPermission("READ_USER")
+            || hasId(userId);
     }
 
     public boolean canUpdateUser(Long userId) {
-        if (userService.isIdOfUser(userId, "SYSTEM") ||
-            userService.isIdOfUser(userId, adminProperties.getUsername()))
+        if (
+            userService.isIdOfUser(userId, "SYSTEM")
+            || userService.isIdOfUser(userId, adminProperties.getUsername())
+        ) {
             return false;
-        return hasPermission("UPDATE_USER") ||
-               hasId(userId);
+        }
+        return hasPermission("UPDATE_USER")
+            || hasId(userId);
     }
 
     public boolean canDeleteUser(Long userId) {
-        if (userService.isIdOfUser(userId, "SYSTEM") ||
-            userService.isIdOfUser(userId, adminProperties.getUsername()))
+        if (
+            userService.isIdOfUser(userId, "SYSTEM")
+            || userService.isIdOfUser(userId, adminProperties.getUsername())
+        ) {
             return false;
-        return hasPermission("DELETE_USER") ||
-               hasId(userId);
+        }
+        return hasPermission("DELETE_USER")
+            || hasId(userId);
     }
 }

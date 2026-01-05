@@ -23,10 +23,9 @@ public enum IdentifierType {
     @JsonCreator
     public static IdentifierType from(String value) {
         return Arrays.stream(values())
-                .filter(t -> t.value.equalsIgnoreCase(value))
-                .findFirst()
-                .orElseThrow(() ->
-                    new IllegalArgumentException("Invalid identifier type: " + value));
+            .filter(t -> t.value.equalsIgnoreCase(value))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Invalid identifier type: " + value));
     }
 
 }

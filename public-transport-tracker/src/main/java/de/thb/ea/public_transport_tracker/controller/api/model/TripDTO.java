@@ -25,14 +25,14 @@ public class TripDTO {
 
     public static TripDTO map(Trip trip) {
         return TripDTO.builder()
-                .id(trip.getId())
-                .remoteId(trip.getRemoteId())
-                .remoteOrigin(trip.getRemoteOrigin())
-                .direction(trip.getDirection())
-                .lineName(trip.getLineName())
-                .type(trip.getType())
-                .updatedAt(trip.getUpdatedAt())
-                .build();
+            .id(trip.getId())
+            .remoteId(trip.getRemoteId())
+            .remoteOrigin(trip.getRemoteOrigin())
+            .direction(trip.getDirection())
+            .lineName(trip.getLineName())
+            .type(trip.getType())
+            .updatedAt(trip.getUpdatedAt())
+            .build();
     }
 
 }

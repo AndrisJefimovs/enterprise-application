@@ -37,26 +37,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-        ) throws ServletException, IOException {
+        @NonNull HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
         
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
 
         try {
-            if (authHeader == null)
+            if (authHeader == null) {
                 throw new NullPointerException();
+            }
             
             if (authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7); // cut of "Bearer "-prefix
                 username = jwtService.extractUsername(token);
             }
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (
+                username != null
+                && SecurityContextHolder.getContext().getAuthentication() == null
+            ) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
                 if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
@@ -64,7 +69,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                         );
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    
+                    authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
@@ -74,6 +83,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }   
     }
-
 
 }

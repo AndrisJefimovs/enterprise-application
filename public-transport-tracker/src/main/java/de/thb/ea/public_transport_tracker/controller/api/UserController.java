@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 
-
-
 @RestController
 @RequestMapping("/api/v1/")
 @AllArgsConstructor
@@ -52,8 +50,9 @@ public class UserController {
         List<UserDTO> userDTOs = new ArrayList<>();
 
         for (User user : userService.getAllUsers()) {
-            if (authService.canReadUser(user.getId()))
+            if (authService.canReadUser(user.getId())) {
                 userDTOs.add(UserDTO.map(user));
+            }
         }
 
         return ResponseEntity.ok().body(userDTOs);
@@ -91,35 +90,43 @@ public class UserController {
     @PostMapping("users")
     @PreAuthorize("@authorizationService.canCreateUser()")
     public ResponseEntity<UserDTO> addNewUser(@RequestBody UserDTO userDTO) {
-        if (userDTO.getUsername() == null ||
-            userDTO.getEmail() == null ||
-            userDTO.getPassword() == null ||
-            userDTO.getPermissions() == null ||
-            userDTO.getLoginEnabled() == null)
+        if (
+            userDTO.getUsername() == null
+            || userDTO.getEmail() == null
+            || userDTO.getPassword() == null
+            || userDTO.getPermissions() == null
+            || userDTO.getLoginEnabled() == null
+        ) {
             return ResponseEntity.badRequest().build();
+        }
 
-        if (userService.usernameExists(userDTO.getUsername()) ||
-            userService.emailExists(userDTO.getEmail()))
+        if (
+            userService.usernameExists(userDTO.getUsername())
+            || userService.emailExists(userDTO.getEmail())
+        ) {
             return ResponseEntity.badRequest().build();
+        }
 
         Set<Permission> permissions = new HashSet<>();
         for (String permissionName : userDTO.getPermissions()) {
             Permission permission = permissionService.getPermissionByName(permissionName);
-            if (permission == null)
+            if (permission == null) {
                 return ResponseEntity.badRequest().build();
+            }
             // user can only give permissions it has itself
-            if (!authService.hasPermission(permissionName))
+            if (!authService.hasPermission(permissionName)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
         }
         
         User newUser = User.builder()
-                           .username(userDTO.getUsername())
-                           .email(userDTO.getEmail())
-                           .password(userDTO.getPassword())
-                           .permissions(permissions)
-                           .createdBy(authService.getUser())
-                           .loginEnabled(userDTO.getLoginEnabled())
-                           .build();
+            .username(userDTO.getUsername())
+            .email(userDTO.getEmail())
+            .password(userDTO.getPassword())
+            .permissions(permissions)
+            .createdBy(authService.getUser())
+            .loginEnabled(userDTO.getLoginEnabled())
+            .build();
         
         newUser = userService.addNewUser(newUser);
 
@@ -145,14 +152,16 @@ public class UserController {
     public ResponseEntity<UserDTO> updateUser(
         @PathVariable("id") Long userId, @RequestBody UserDTO userDTO
     ) {
-        if (userDTO.getId() != null && userId != userDTO.getId())
+        if (userDTO.getId() != null && userId != userDTO.getId()) {
             return ResponseEntity.badRequest().build();
+        }
 
         User user = userService.getUserById(userId);
 
         if (user == null) {
             return ResponseEntity.badRequest().build();
         }
+
         if (userDTO.getUsername() != null) {
             user.setUsername(userDTO.getUsername());
         }
@@ -162,40 +171,52 @@ public class UserController {
         if (userDTO.getPassword() != null) {
             user.setPassword(userDTO.getPassword());
         }
+
         if (userDTO.getPermissions() != null) {
             Set<Permission> permissions = new HashSet<>();
             Set<Permission> originalPermissions = user.getPermissions();
+
             for (String permissionName : userDTO.getPermissions()) {
                 Permission permission = permissionService.getPermissionByName(permissionName);
-                if (permission == null)
+                
+                if (permission == null) {
                     return ResponseEntity.badRequest().build();
+                }
+
                 // user can only add permissions it has itself
-                if (!originalPermissions.contains(permission) &&
-                    !authService.hasPermission(permissionName)) {
+                if (
+                    !originalPermissions.contains(permission)
+                    && !authService.hasPermission(permissionName)
+                ) {
                     logger.info("Failed to add permission");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
+
                 permissions.add(permission);
             }
             for (Permission permission : originalPermissions) {
                 // user can only remove permissions it has itself
-                if (!permissions.contains(permission) &&
-                    !authService.hasPermission(permission.getName())) {
+                if (
+                    !permissions.contains(permission)
+                    && !authService.hasPermission(permission.getName())
+                ) {
                     logger.info("Failed to remove permission");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
             }
             user.setPermissions(permissions);
         }
+
         if (userDTO.getLoginEnabled() != null) {
             user.setLoginEnabled(userDTO.getLoginEnabled());
         }
 
         user = userService.updateUser(user);
 
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        
+        }
+
         return ResponseEntity.ok().body(UserDTO.map(user));
     }
 
@@ -205,14 +226,16 @@ public class UserController {
     public ResponseEntity<UserDTO> deleteUser(@PathVariable("id") Long userId) {
         User user = userService.getUserById(userId);
         
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.badRequest().build();
+        }
 
         user = userService.deleteUser(user);
 
-        if (user == null)
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
+        }
+        
         return ResponseEntity.ok().body(UserDTO.map(user));
     }
 }

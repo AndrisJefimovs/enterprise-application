@@ -39,9 +39,9 @@ public class PermissionService {
     public Permission getPermissionByName(String permissionName) {
         Optional<Permission> permission = permissionRepository.findByName(permissionName);
 
-        if (permission.isPresent())
+        if (permission.isPresent()) {
             return permission.get();
-
+        }
         return null;
     }
 
@@ -53,8 +53,9 @@ public class PermissionService {
      * @return Permission or null if failed.
      */
     public Permission addNewPermission(String permissionName) {
-        if (permissionName == null)
+        if (permissionName == null) {
             return null;
+        }
         return addNewPermission(Permission.builder().name(permissionName).build());
     }
 
@@ -66,22 +67,25 @@ public class PermissionService {
      * @return Permission or null if failed.
      */
     public Permission addNewPermission(Permission permission) {
-        if (permission == null)
+        if (permission == null) {
             return null;
-
+        }
         permission.forgetId();
 
         try {
             permissionRepository.save(permission);
         }
         catch (Exception e) {
-            logger.info(String.format("Failed to create new permission with name '%s'",
-                                      permission.getName()));
+            logger.info(String.format(
+                "Failed to create new permission with name '%s'", permission.getName()
+            ));
             logger.debug(e.toString());
             return null;
         }
-        logger.info(String.format("Successfully created new permission '%s' with id %d",
-                                  permission.getName(), permission.getId()));
+        logger.info(String.format(
+            "Successfully created new permission '%s' with id %d",
+            permission.getName(), permission.getId()
+        ));
         return permission;
     }
 
@@ -93,8 +97,9 @@ public class PermissionService {
      * @return The deleted permission or null if failed.
      */
     public Permission deletePermission(Permission permission) {
-        if (permission == null)
+        if (permission == null) {
             return null;
+        }
 
         try {
             permissionRepository.delete(permission);
@@ -104,6 +109,7 @@ public class PermissionService {
             logger.debug(e.toString());
             return permission;
         }
+
         logger.info(String.format("Successfully deleted permission '%s'", permission.getName()));
         return permission;
     }
@@ -116,8 +122,9 @@ public class PermissionService {
      * @return true if permission exists; otherwise false.
      */
     public boolean permissionExists(String permissionName) {
-        if (permissionName == null)
+        if (permissionName == null) {
             return false;
+        }
         return permissionRepository.findByName(permissionName).isPresent();
     }
 

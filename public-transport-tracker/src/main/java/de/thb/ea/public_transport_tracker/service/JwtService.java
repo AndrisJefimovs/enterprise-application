@@ -52,11 +52,11 @@ public class JwtService {
         final Date now = new Date();
         final Date expiration = new Date(now.getTime() + jwtExpiration);
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(userDetails.getUsername())
+            .setIssuedAt(now)
+            .setExpiration(expiration)
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     /**
@@ -74,8 +74,9 @@ public class JwtService {
             refreshVersion = userService.nextRefreshVersion(user);
         }
         catch (Exception e) {
-            logger.warn(String.format("Failed to update user (id: %d) with new refresh version.",
-                                        user.getId()));
+            logger.warn(String.format(
+                "Failed to update user (id: %d) with new refresh version.", user.getId()
+            ));
             return null;
         }
 
@@ -83,12 +84,12 @@ public class JwtService {
         claims.put("version", refreshVersion);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(user.getUsername())
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
+            .setClaims(claims)
+            .setSubject(user.getUsername())
+            .setIssuedAt(now)
+            .setExpiration(expiration)
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     /**
@@ -157,10 +158,10 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(getSignKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
     private Boolean isTokenExpired(String token) {

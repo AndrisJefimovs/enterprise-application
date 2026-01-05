@@ -28,20 +28,21 @@ public class UserDTO {
 
     public static UserDTO map(User user) {
         Long createdBy = null;
-        if (user.getCreatedBy() != null)
+        if (user.getCreatedBy() != null) {
             createdBy = user.getCreatedBy().getId();
+        }
 
         return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .permissions(user.getPermissions().stream().map(e -> e.getName())
-                                .collect(Collectors.toSet()))
-                .createdBy(createdBy)
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .refreshVersion(user.getRefreshVersion())
-                .loginEnabled(user.isLoginEnabled())
-                .build();
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .permissions(user.getPermissions().stream().map(e -> e.getName())
+                .collect(Collectors.toSet()))
+            .createdBy(createdBy)
+            .createdAt(user.getCreatedAt())
+            .updatedAt(user.getUpdatedAt())
+            .refreshVersion(user.getRefreshVersion())
+            .loginEnabled(user.isLoginEnabled())
+            .build();
     }
 }

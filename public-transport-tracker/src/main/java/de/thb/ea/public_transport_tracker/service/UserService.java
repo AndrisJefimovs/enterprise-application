@@ -44,8 +44,9 @@ public class UserService implements UserDetailsService {
         }
         User user = getUserByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException(String.format("No user found with username '%s'",
-                                                              username));
+            throw new UsernameNotFoundException(
+                String.format("No user found with username '%s'", username)
+            );
         }
         return user;
     }
@@ -70,9 +71,10 @@ public class UserService implements UserDetailsService {
     public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
 
-        if (user.isPresent())
+        if (user.isPresent()) {
             return user.get();
-        
+        }
+
         return null;
     }
 
@@ -84,9 +86,9 @@ public class UserService implements UserDetailsService {
      * @return user or null if failed.
      */
     public User getUserByUsername(String username) {
-        if (username == null)
+        if (username == null) {
             return null;
-
+        }
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             return null;
@@ -102,9 +104,9 @@ public class UserService implements UserDetailsService {
      * @return user of null if failed.
      */
     public User getUserByEmail(String email) {
-        if (email == null)
+        if (email == null) {
             return null;
-
+        }
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
             return null;
@@ -119,9 +121,9 @@ public class UserService implements UserDetailsService {
      * @return The added user instance or null if failed.
      */
     public User addNewUser(User user) {
-        if (user == null)
+        if (user == null) {
             return null;
-
+        }
         user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword())); // hash password
         try {
@@ -132,8 +134,9 @@ public class UserService implements UserDetailsService {
             logger.debug(e.toString());
             return null;
         }
-        logger.info(String.format("Successfully created new user '%s' with id %d",
-                                  user.getUsername(), user.getId()));
+        logger.info(String.format(
+            "Successfully created new user '%s' with id %d", user.getUsername(), user.getId()
+        ));
         return user;
     }
 
@@ -144,13 +147,18 @@ public class UserService implements UserDetailsService {
      * @return updated user instance or null if failed.
      */
     public User updateUser(User user) {
-        if (user == null)
+        if (user == null) {
             return null;
+        }
         try {
             User oldUser = getUserById(user.getId());
             if (oldUser != null) {
-                if (user.getPassword() != null && !user.getPassword().equals(oldUser.getPassword()))
+                if (
+                    user.getPassword() != null &&
+                    !user.getPassword().equals(oldUser.getPassword())
+                ) {
                     user.setPassword(passwordEncoder.encode(user.getPassword()));
+                }
                 user = userRepository.save(user);
             }
         }
@@ -167,20 +175,22 @@ public class UserService implements UserDetailsService {
      * @return The deleted user instance or null if failed.
      */
     public User deleteUser(User user) {
-        if (user == null)
+        if (user == null) {
             return null;
-
+        }
         try {
             userRepository.delete(user);
         }
         catch (Exception e) {
-            logger.info(String.format("Failed to delete user '%s' with id %d", user.getUsername(),
-                                        user.getId()));
+            logger.info(String.format(
+                "Failed to delete user '%s' with id %d", user.getUsername(), user.getId()
+            ));
             logger.debug(e.toString());
             return null;
         }
-        logger.info(String.format("Deleted user '%s' with id %d", user.getUsername(),
-                                    user.getId()));
+        logger.info(String.format(
+            "Deleted user '%s' with id %d", user.getUsername(), user.getId()
+        ));
         return user;
     }
 
@@ -191,8 +201,9 @@ public class UserService implements UserDetailsService {
      * @return true if user exists; otherwise false
      */
     public boolean userIdExists(Long userId) {
-        if (userId == null)
+        if (userId == null) {
             return false;
+        }
         return userRepository.findById(userId).isPresent();
     }
 
@@ -203,8 +214,9 @@ public class UserService implements UserDetailsService {
      * @return true if the username exists; otherwise false
      */
     public boolean usernameExists(String username) {
-        if (username == null)
+        if (username == null) {
             return false;
+        }
         return userRepository.findByUsername(username).isPresent();
     }
 
@@ -215,8 +227,9 @@ public class UserService implements UserDetailsService {
      * @return true if the email already exists; otherwise false.
      */
     public boolean emailExists(String email) {
-        if (email == null)
+        if (email == null) {
             return false;
+        }
         return userRepository.findByEmail(email).isPresent();
     }
 
@@ -228,8 +241,9 @@ public class UserService implements UserDetailsService {
      */
     public Integer nextRefreshVersion(User user) {
         user.setRefreshVersion(user.getRefreshVersion() + 1);
-        if (updateUser(user) == null)
+        if (updateUser(user) == null) {
             return null;
+        }
         return user.getRefreshVersion();
     }
 
@@ -242,8 +256,9 @@ public class UserService implements UserDetailsService {
      */
     public boolean isIdOfUser(Long id, String username) {
         User user = getUserById(id);
-        if (user == null)
+        if (user == null) {
             return false;
+        }
         return user.getUsername().equals(username);
     }
 

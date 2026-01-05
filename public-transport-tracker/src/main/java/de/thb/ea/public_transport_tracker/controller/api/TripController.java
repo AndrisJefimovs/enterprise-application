@@ -28,18 +28,19 @@ public class TripController {
     public ResponseEntity<List<TripDTO>> getMethodName(
         @RequestParam Double latitude, @RequestParam Double longitude
     ) {
-        if (latitude == null || longitude == null)
+        if (latitude == null || longitude == null) {
             return ResponseEntity.badRequest().build();
+        }
 
         List<Trip> trips = tripService.getNearbyTrips(latitude, longitude, 500, 64);
 
-        if (trips == null)
+        if (trips == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         return ResponseEntity.ok().body(
             trips.stream().map(e -> TripDTO.map(e)).collect(Collectors.toList())
         );
     }
-    
 
 }

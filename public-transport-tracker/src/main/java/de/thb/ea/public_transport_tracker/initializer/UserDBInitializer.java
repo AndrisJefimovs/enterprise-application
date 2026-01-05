@@ -33,8 +33,10 @@ public class UserDBInitializer implements ApplicationRunner {
     private final PermissionService permissionService;
 
 
-    public UserDBInitializer(AdminProperties adminProperties, UserService userService,
-                             PermissionService permissionService) {
+    public UserDBInitializer(
+        AdminProperties adminProperties, UserService userService,
+        PermissionService permissionService
+    ) {
         this.adminProperties = adminProperties;
         this.userService = userService;
         this.permissionService = permissionService;
@@ -48,38 +50,48 @@ public class UserDBInitializer implements ApplicationRunner {
         List<String> emails = args.getOptionValues("admin-email");
 
         if (usernames != null) {
-            if (usernames.size() > 1)
+            if (usernames.size() > 1) {
                 throw new IllegalArgumentException("Multiple default admin usernames");
-            if (!usernames.isEmpty())
+            }
+            if (!usernames.isEmpty()) {
                 adminProperties.setUsername(usernames.get(0));
+            }
         }
 
         if (passwords != null) {
-            if (passwords.size() > 1)
+            if (passwords.size() > 1) {
                 throw new IllegalArgumentException("Multiple default admin passwords");
-            if (!passwords.isEmpty())
+            }
+            if (!passwords.isEmpty()) {
                 adminProperties.setPassword(passwords.get(0));
+            }
         }
 
         if (emails != null) {
-            if (emails.size() > 1)
+            if (emails.size() > 1) {
                 throw new IllegalArgumentException("Multiple default admin email addresses");
-            if (!emails.isEmpty())
+            }
+            if (!emails.isEmpty()) {
                 adminProperties.setEmail(emails.get(0));
+            }
         }
 
         // create permissions if not exist
         for (String permissionName : permissionNames) {
             if (!permissionService.permissionExists(permissionName)) {
                 Permission permission = permissionService.addNewPermission(permissionName);
+
                 if (permission == null) {
                     logger.warn(String.format("Failed to create permission '%s'", permissionName));
-                    logger.info(String.format("You may need to create permission '%s' manually",
-                                              permissionName));
+                    logger.info(String.format(
+                        "You may need to create permission '%s' manually", permissionName
+                    ));
                 }
                 else {
-                    logger.debug(String.format("Successfully created permission '%s' with id %d",
-                                               permission.getName(), permission.getId()));
+                    logger.debug(String.format(
+                        "Successfully created permission '%s' with id %d",
+                        permission.getName(), permission.getId()
+                    ));
                 }
             }
             else {
@@ -93,42 +105,53 @@ public class UserDBInitializer implements ApplicationRunner {
 
         if (systemUser == null) {
             systemUser = userService.addNewUser(
-                User.builder().username(systemUserName).email("").loginEnabled(false).build()
+                User.builder()
+                    .username(systemUserName)
+                    .email("")
+                    .loginEnabled(false)
+                    .build()
             );
             if (systemUser == null) {
                 logger.error(String.format("Failed to create user '%s'", systemUserName));
                 throw new Exception("Failed to create system user");
             }
             else {
-                logger.debug(String.format("Successfully created user '%s' with id %d",
-                                           systemUser.getUsername(), systemUser.getId()));
+                logger.debug(String.format(
+                    "Successfully created user '%s' with id %d",
+                    systemUser.getUsername(), systemUser.getId()
+                ));
             }
         }
         else {
-            logger.info(String.format("System user '%s' (id %d) already exists",
-                                      systemUser.getUsername(), systemUser.getId()));
+            logger.info(String.format(
+                "System user '%s' (id %d) already exists",
+                systemUser.getUsername(), systemUser.getId()
+            ));
         }
 
         // create admin user
         User admin = userService.getUserByUsername(adminProperties.getUsername());
         if (admin == null) {
             admin = User.builder()
-                        .username(adminProperties.getUsername())
-                        .email(adminProperties.getEmail())
-                        .password(adminProperties.getPassword())
-                        .permissions(permissionService.getAllPermissions().stream()
-                                        .collect(Collectors.toSet()))
-                        .createdBy(systemUser)
-                        .build();
+                .username(adminProperties.getUsername())
+                .email(adminProperties.getEmail())
+                .password(adminProperties.getPassword())
+                .permissions(permissionService.getAllPermissions()
+                    .stream().collect(Collectors.toSet()))
+                .createdBy(systemUser)
+                .build();
+
             admin = userService.addNewUser(admin);
             if (admin == null) {
-                logger.warn(String.format("Failed to create user '%s'",
-                                            adminProperties.getUsername()));
+                logger.warn(String.format(
+                    "Failed to create user '%s'", adminProperties.getUsername()
+                ));
                 logger.info("You may need to create the user by hand.");
             }
             else {
-                logger.debug(String.format("Successfully created super admin user '%s'",
-                                            admin.getUsername()));
+                logger.debug(String.format(
+                    "Successfully created super admin user '%s'", admin.getUsername()
+                ));
             }
         }
         else {

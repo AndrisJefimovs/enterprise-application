@@ -21,22 +21,24 @@ public class TripService {
 
 
     public Trip getTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId) {
-        if (remoteId == null || remoteOrigin == null)
+        if (remoteId == null || remoteOrigin == null) {
             return null;
+        }
+        Optional<Trip> trip = tripRepository.findTripByRemoteOriginAndRemoteId(
+            remoteOrigin, remoteId
+        );
 
-        Optional<Trip> trip = tripRepository.findTripByRemoteOriginAndRemoteId(remoteOrigin, remoteId);
-
-        if (trip.isPresent())
+        if (trip.isPresent()) {
             return trip.get();
-
+        }
         return null;
     }
 
 
     public Trip addNewTrip(Trip trip) {
-        if (trip == null)
+        if (trip == null) {
             return null;
-
+        }
         trip.forgetId();
         try {
             trip = tripRepository.save(trip);
@@ -50,9 +52,9 @@ public class TripService {
 
 
     public Trip updateTrip(Trip trip) {
-        if (trip == null)
+        if (trip == null) {
             return null;
-
+        }
         try {
             trip = tripRepository.save(trip);
         }
@@ -87,14 +89,17 @@ public class TripService {
                         .build()
                 );
                 // error
-                if (trip == null)
+                if (trip == null) {
                     return null;
+                }
             }
             
             trip = updateTrip(trip);
+
             // error
-            if (trip == null)
+            if (trip == null) {
                 return null;
+            }
 
             trips.add(trip);
         }
