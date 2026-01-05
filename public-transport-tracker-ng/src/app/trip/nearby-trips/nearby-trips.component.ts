@@ -13,6 +13,9 @@ export class NearbyTripsComponent implements OnInit {
 
     public trips: ITrip[] = [];
 
+    public loading: boolean = false;
+    public error?: string;
+
     constructor(
         private tripService: TripService
     ) {}
@@ -22,11 +25,17 @@ export class NearbyTripsComponent implements OnInit {
     }
 
     public updateTrips(): void {
+        this.loading = true;
         this.tripService.getNearbyTrips().subscribe({
             next: (res) => {
                 this.trips = res;
+                this.error = undefined;
+                this.loading = false;
             },
-            error: (err) => {}
+            error: (err) => {
+                this.error = "Es ist ein Fehler aufgetreten!";
+                this.loading = false;
+            }
         })
     }
 

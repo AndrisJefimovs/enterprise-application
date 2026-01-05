@@ -25,10 +25,6 @@ export class TripService {
                     .set('longitude', location.longitude.toString());
 
                 return this.httpClient.get<ITrip[]>(this.API + '/nearby', { params });
-            }),
-            catchError(error => {
-                console.error('Failed to get nearby trips', error);
-                return of([]);
             })
         );
     }

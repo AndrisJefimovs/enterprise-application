@@ -1,7 +1,13 @@
 <h2>Fahrzeuge in der Nähe</h2>
 
 <div class="component-box component-box-list">
-    @if (trips && trips.length > 0) {
+    @if (loading) {
+        <div>Suche nach Fahrzeugen in deiner Umgenbung...</div>
+    }
+    @else if (error) {
+        <div class="error">{{ error }}</div>
+    }
+    @else if (trips && trips.length > 0) {
         <ul>
             @for (trip of trips; track trip.id) {
                 <li>
@@ -13,6 +19,8 @@
         </ul>
     }
     @else {
-        Es wurden keine Fahrzeuge in deiner Umgebung gefunden.
+        <div>Es wurden keine Fahrzeuge in deiner Umgebung gefunden.</div>
     }
+
+    <button class="dark-button" [disabled]="loading" (click)="updateTrips()">Erneut Suchen</button>
 </div>
