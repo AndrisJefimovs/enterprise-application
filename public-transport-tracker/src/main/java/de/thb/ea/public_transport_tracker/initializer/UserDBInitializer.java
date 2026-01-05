@@ -9,7 +9,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import de.thb.ea.public_transport_tracker.config.AdminProperties;
+import de.thb.ea.public_transport_tracker.config.property.AdminProperties;
 import de.thb.ea.public_transport_tracker.entity.Permission;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.PermissionService;

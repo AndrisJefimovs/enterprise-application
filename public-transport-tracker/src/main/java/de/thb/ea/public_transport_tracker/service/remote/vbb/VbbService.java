@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.service.vbb;
+package de.thb.ea.public_transport_tracker.service.remote.vbb;
 
 import java.net.URI;
 import java.util.List;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import de.thb.ea.public_transport_tracker.service.vbb.model.VbbMovement;
-import de.thb.ea.public_transport_tracker.service.vbb.model.VbbRadarResponse;
+import de.thb.ea.public_transport_tracker.service.remote.vbb.model.VbbMovement;
+import de.thb.ea.public_transport_tracker.service.remote.vbb.model.VbbRadarResponse;
 import de.thb.ea.public_transport_tracker.util.BoundingBox;
 import de.thb.ea.public_transport_tracker.util.GeoUtils;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.config;
+package de.thb.ea.public_transport_tracker.config.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

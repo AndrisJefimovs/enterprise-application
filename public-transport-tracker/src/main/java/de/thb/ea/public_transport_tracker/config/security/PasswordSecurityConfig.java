@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.config;
+package de.thb.ea.public_transport_tracker.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.Trip;
 import de.thb.ea.public_transport_tracker.repository.TripRepository;
-import de.thb.ea.public_transport_tracker.service.vbb.VbbService;
-import de.thb.ea.public_transport_tracker.service.vbb.model.VbbMovement;
+import de.thb.ea.public_transport_tracker.service.remote.vbb.VbbService;
+import de.thb.ea.public_transport_tracker.service.remote.vbb.model.VbbMovement;
 import lombok.AllArgsConstructor;
 
 @Service

@@ -2,8 +2,8 @@ package de.thb.ea.public_transport_tracker.service;
 
 import org.springframework.stereotype.Service;
 
-import de.thb.ea.public_transport_tracker.config.AdminProperties;
-import de.thb.ea.public_transport_tracker.config.SecurityContextFacade;
+import de.thb.ea.public_transport_tracker.config.property.AdminProperties;
+import de.thb.ea.public_transport_tracker.config.security.SecurityContextFacade;
 import de.thb.ea.public_transport_tracker.entity.User;
 import lombok.AllArgsConstructor;
 
