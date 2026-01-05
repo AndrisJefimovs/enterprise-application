@@ -4,22 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.Trip;
 import de.thb.ea.public_transport_tracker.repository.TripRepository;
 import de.thb.ea.public_transport_tracker.service.vbb.VbbService;
 import de.thb.ea.public_transport_tracker.service.vbb.model.VbbMovement;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class TripService {
 
-    @Autowired
-    private VbbService vbbService;
-
-    @Autowired
-    private TripRepository tripRepository;
+    private final VbbService vbbService;
+    private final TripRepository tripRepository;
 
 
     public Trip getTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId) {

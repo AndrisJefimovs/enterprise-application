@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thb.ea.public_transport_tracker.controller.api.model.TripDTO;
 import de.thb.ea.public_transport_tracker.entity.Trip;
 import de.thb.ea.public_transport_tracker.service.TripService;
+import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/api/v1/")
 @RestController
+@AllArgsConstructor
 public class TripController {
 
-    @Autowired
-    private TripService tripService;
+    private final TripService tripService;
     
     @GetMapping("trips/nearby")
     public ResponseEntity<List<TripDTO>> getMethodName(

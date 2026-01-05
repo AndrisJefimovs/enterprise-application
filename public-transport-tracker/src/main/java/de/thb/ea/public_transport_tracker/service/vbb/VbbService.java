@@ -15,14 +15,14 @@ import de.thb.ea.public_transport_tracker.service.vbb.model.VbbMovement;
 import de.thb.ea.public_transport_tracker.service.vbb.model.VbbRadarResponse;
 import de.thb.ea.public_transport_tracker.util.BoundingBox;
 import de.thb.ea.public_transport_tracker.util.GeoUtils;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class VbbService {
     
-    @Autowired
-    private RestTemplate restTemplate;
-
     private final String API = "https://v6.vbb.transport.rest";
+    private final RestTemplate restTemplate;
 
 
     public List<VbbMovement> getNearbyMovements(double latitude, double longitude, double radius, int n) {
