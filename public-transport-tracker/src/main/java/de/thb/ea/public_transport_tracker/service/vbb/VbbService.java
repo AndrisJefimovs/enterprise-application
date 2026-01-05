@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class VbbService {
     
-    private final String API = "https://v6.vbb.transport.rest";
+    public static final String API = "https://v6.vbb.transport.rest";
     private final RestTemplate restTemplate;
 
 
