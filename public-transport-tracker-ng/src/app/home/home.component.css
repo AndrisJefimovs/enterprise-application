@@ -1,0 +1,25 @@
+.text-right {
+    text-align: right;
+}
+
+div.header a {
+    margin: 0px;
+    font-size: clamp(14px, 2.7vw, 22px);
+}
+
+div.header > h2 {
+    float: left;
+    margin: 0px;
+}
+
+div.main-wrapper {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+@media (min-width: 600px) {
+
+    div.main-wrapper {
+        margin-top: 0px;
+    }
+}

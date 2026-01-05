@@ -1,6 +1,6 @@
-<h2>Fahrzeuge in der Nähe</h2>
+<h2 [class.embedded]="embedded">Fahrzeuge in der Nähe</h2>
 
-<div class="component-box component-box-list">
+<div [class.embedded]="embedded" class="component-box component-box-list">
     @if (loading) {
         <div>Suche nach Fahrzeugen in deiner Umgenbung...</div>
     }

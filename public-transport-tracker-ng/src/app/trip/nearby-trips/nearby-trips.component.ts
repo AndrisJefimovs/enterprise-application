@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { TripService } from "../trip.service";
 import { ITrip } from "../model/trip";
 
@@ -10,6 +10,8 @@ import { ITrip } from "../model/trip";
     styleUrl: './nearby-trips.component.css',
 })
 export class NearbyTripsComponent implements OnInit {
+
+    @Input() public embedded: boolean = false;
 
     public trips: ITrip[] = [];
 

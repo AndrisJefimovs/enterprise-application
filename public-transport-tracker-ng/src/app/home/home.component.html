@@ -1,0 +1,14 @@
+<div class="header">
+    <h2>Startseite</h2>
+    @if (logedIn) {
+        <div class="clickable text-right" (click)="logout()"><a>logout</a></div>
+        <div class="clickable text-right" (click)="profile()"><a>profile</a></div>
+    }
+    @else {
+        <div class="clickable text-right" (click)="login()"><a>login</a></div>
+    }
+</div>
+
+<div class="main-wrapper">
+    <app-nearby-trips [embedded]="true"></app-nearby-trips>
+</div>

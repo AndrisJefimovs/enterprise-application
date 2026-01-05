@@ -6,3 +6,7 @@ button {
     text-align: center;
     margin-top: 12px;
 }
+
+h2.embedded {
+    font-size: clamp(20px, 3.0vw, 30px);
+}

@@ -14,6 +14,10 @@ body {
     flex-direction: column;
 }
 
+div.header {
+    margin: 24px;
+}
+
 h1 {
     display: table-cell;
     vertical-align: middle;
@@ -316,15 +320,28 @@ app-nearby-trips {
     flex-direction: column;
 }
 
+app-home {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
 @media (min-width: 600px) {
+    div.header {
+        margin-left: 18dvw;
+        margin-right: 18dvw;
+        margin-top: auto;
+    }
+
     div.component-box {
         margin-top: 0;
-        margin-left: 18vw;
-        margin-right: 18vw;
+        margin-left: 18dvw;
+        margin-right: 18dvw;
     }
 
     h2 {
-        margin-left: 18vw;
+        margin-left: 18dvw;
 
         margin-top: auto;
         margin-bottom: 20px;
@@ -336,13 +353,19 @@ app-nearby-trips {
 }
 
 @media (min-width: 1200px) {
+    div.header {
+        margin-left: 25dvw;
+        margin-right: 25dvw;
+        margin-top: auto;
+    }
+
     div.component-box {
-        margin-left: 25vw;
-        margin-right: 25vw;
+        margin-left: 25dvw;
+        margin-right: 25dvw;
     }
 
     h2 {
-        margin-left: 25vw;
+        margin-left: 25dvw;
 
         margin-top: auto;
         margin-bottom: 20px;
