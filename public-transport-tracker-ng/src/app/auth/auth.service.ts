@@ -7,7 +7,6 @@ import { TokenService } from '../core/token.service';
 import { IUser } from '../user/model/user';
 import { UserService } from '../user/user.service';
 
-const USER_ID_KEY: string = 'USER_ID';
 
 @Injectable({
     providedIn: 'root'
@@ -62,11 +61,7 @@ export class AuthService {
     }
 
     public getId(): number | null {
-        let userId: string | null = localStorage.getItem(USER_ID_KEY);
-        if (userId) {
-            return Number(userId);
-        }
-        return null;
+        return this.user?.id ?? null;
     }
 
     // authentication
@@ -95,7 +90,6 @@ export class AuthService {
                 tap(res => {
                     if (res.statusCode === 0) {
                         this.tokenService.saveTokens(res.token!, res.refreshToken!);
-                        localStorage.setItem(USER_ID_KEY, String(res.userId!));
                         this.loadCurrentUser().subscribe();
                     }
                 })
@@ -114,7 +108,6 @@ export class AuthService {
 
     public logout(): void {
         this.tokenService.clear();
-        localStorage.removeItem(USER_ID_KEY);
         this.clearState();
     }
 

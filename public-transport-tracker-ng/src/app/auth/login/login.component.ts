@@ -86,7 +86,7 @@ export class LoginComponent implements OnInit {
                     this.loading = false;
                     switch (res.statusCode) {
                         case 0:
-                            this.router.navigate(['/']);
+                            this.router.navigate(['/home']);
                             break;
                         default:
                             this.error = 'Login fehlgeschlagen';
