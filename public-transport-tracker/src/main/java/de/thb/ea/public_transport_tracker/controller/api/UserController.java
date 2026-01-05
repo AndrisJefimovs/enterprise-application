@@ -2,7 +2,6 @@ package de.thb.ea.public_transport_tracker.controller.api;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import de.thb.ea.public_transport_tracker.controller.api.model.UserDTO;
 import de.thb.ea.public_transport_tracker.entity.Permission;
@@ -20,6 +19,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +48,7 @@ public class UserController {
      * @return list of all users
      */
     @GetMapping("users")
-    public List<UserDTO> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> userDTOs = new ArrayList<>();
 
         for (User user : userService.getAllUsers()) {
@@ -56,7 +56,7 @@ public class UserController {
                 userDTOs.add(UserDTO.map(user));
         }
 
-        return userDTOs;
+        return ResponseEntity.ok().body(userDTOs);
     }
     
     /**
@@ -64,20 +64,18 @@ public class UserController {
      * 
      * @param userId user id of reqested user.
      * @return user with specified id
-     * @throws ResponseStatusException 404 if user not found
      */
     @GetMapping("users/{id}")
     @PreAuthorize("@authorizationService.canReadUser(#userId)")
-    public UserDTO getUser(@PathVariable("id") Long userId)
-            throws ResponseStatusException {
+    public ResponseEntity<UserDTO> getUser(@PathVariable("id") Long userId) {
 
         User user = userService.getUserById(userId);
         
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         
-        return UserDTO.map(user);
+        return ResponseEntity.ok().body(UserDTO.map(user));
     }
 
 
@@ -89,30 +87,29 @@ public class UserController {
      * 
      * @param userDTO
      * @return created user
-     * @throws ResponseStatusException
      */
     @PostMapping("users")
     @PreAuthorize("@authorizationService.canCreateUser()")
-    public UserDTO addNewUser(@RequestBody UserDTO userDTO) throws ResponseStatusException {
+    public ResponseEntity<UserDTO> addNewUser(@RequestBody UserDTO userDTO) {
         if (userDTO.getUsername() == null ||
             userDTO.getEmail() == null ||
             userDTO.getPassword() == null ||
             userDTO.getPermissions() == null ||
             userDTO.getLoginEnabled() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         if (userService.usernameExists(userDTO.getUsername()) ||
             userService.emailExists(userDTO.getEmail()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         Set<Permission> permissions = new HashSet<>();
         for (String permissionName : userDTO.getPermissions()) {
             Permission permission = permissionService.getPermissionByName(permissionName);
             if (permission == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().build();
             // user can only give permissions it has itself
             if (!authService.hasPermission(permissionName))
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
         User newUser = User.builder()
@@ -127,10 +124,10 @@ public class UserController {
         newUser = userService.addNewUser(newUser);
 
         if (newUser == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         
-        return UserDTO.map(newUser);
+        return ResponseEntity.ok().body(UserDTO.map(newUser));
     }
     
 
@@ -145,16 +142,16 @@ public class UserController {
      */
     @PutMapping("users/{id}")
     @PreAuthorize("@authorizationService.canUpdateUser(#userId)")
-    public UserDTO updateUser(@PathVariable("id") Long userId, @RequestBody UserDTO userDTO)
-        throws ResponseStatusException {
-
+    public ResponseEntity<UserDTO> updateUser(
+        @PathVariable("id") Long userId, @RequestBody UserDTO userDTO
+    ) {
         if (userDTO.getId() != null && userId != userDTO.getId())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         User user = userService.getUserById(userId);
 
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.badRequest().build();
         }
         if (userDTO.getUsername() != null) {
             user.setUsername(userDTO.getUsername());
@@ -171,12 +168,12 @@ public class UserController {
             for (String permissionName : userDTO.getPermissions()) {
                 Permission permission = permissionService.getPermissionByName(permissionName);
                 if (permission == null)
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                    return ResponseEntity.badRequest().build();
                 // user can only add permissions it has itself
                 if (!originalPermissions.contains(permission) &&
                     !authService.hasPermission(permissionName)) {
                     logger.info("Failed to add permission");
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
                 permissions.add(permission);
             }
@@ -185,7 +182,7 @@ public class UserController {
                 if (!permissions.contains(permission) &&
                     !authService.hasPermission(permission.getName())) {
                     logger.info("Failed to remove permission");
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
             }
             user.setPermissions(permissions);
@@ -197,25 +194,25 @@ public class UserController {
         user = userService.updateUser(user);
 
         if (user == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         
-        return UserDTO.map(user);
+        return ResponseEntity.ok().body(UserDTO.map(user));
     }
 
 
     @DeleteMapping("users/{id}")
     @PreAuthorize("@authorizationService.canDeleteUser(#userId)")
-    public UserDTO deleteUser(@PathVariable("id") Long userId) throws ResponseStatusException {
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable("id") Long userId) {
         User user = userService.getUserById(userId);
         
         if (user == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.badRequest().build();
 
         user = userService.deleteUser(user);
 
         if (user == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
-        return UserDTO.map(user);
+        return ResponseEntity.ok().body(UserDTO.map(user));
     }
 }

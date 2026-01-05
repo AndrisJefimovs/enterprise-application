@@ -1,6 +1,7 @@
 package de.thb.ea.public_transport_tracker.controller.auth;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import de.thb.ea.public_transport_tracker.controller.auth.model.AuthResponseDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.LoginRequestDTO;
@@ -32,17 +32,17 @@ public class AuthController {
 
     
     @PostMapping("register")
-    public RegisterResponseDTO postMethodName(@RequestBody RegisterRequestDTO request) {
+    public ResponseEntity<RegisterResponseDTO> postMethodName(@RequestBody RegisterRequestDTO request) {
         if (request.getEmail() == null ||
             request.getUsername() == null ||
             request.getPassword() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         if (userService.usernameExists(request.getUsername()))
-            return RegisterResponseDTO.usernameAlreadyTaken();
+            return ResponseEntity.ok().body(RegisterResponseDTO.usernameAlreadyTaken());
         
         if (userService.emailExists(request.getEmail()))
-            return RegisterResponseDTO.emailAlreadyTaken();
+            return ResponseEntity.ok().body(RegisterResponseDTO.emailAlreadyTaken());
 
         User user = userService.addNewUser(
             User.builder()
@@ -53,20 +53,18 @@ public class AuthController {
         );
 
         if (user == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().build();
             
-        return RegisterResponseDTO.success();
+        return ResponseEntity.ok().body(RegisterResponseDTO.success());
     }
 
 
     @PostMapping("login")
-    public AuthResponseDTO authenticateUser(@RequestBody LoginRequestDTO request)
-        throws ResponseStatusException {
-
+    public ResponseEntity<AuthResponseDTO> authenticateUser(@RequestBody LoginRequestDTO request) {
         if (request.getIdentifier() == null ||
             request.getIdentifierType() == null ||
             request.getPassword() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         User user;
         switch (request.getIdentifierType()) {
@@ -77,14 +75,14 @@ public class AuthController {
                 user = userService.getUserByEmail(request.getIdentifier());
                 break;
             default:
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().build();
         }
 
         if (user == null)
-            return AuthResponseDTO.userNotFound();
+            return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
 
         if (!user.isLoginEnabled())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -98,22 +96,23 @@ public class AuthController {
             String refreshToken = jwtService.generateRefreshToken(user);
 
             if (token == null || refreshToken == null)
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
-            return AuthResponseDTO.success(user.getId(), token, refreshToken);
+            return ResponseEntity.ok().body(
+                AuthResponseDTO.success(user.getId(), token, refreshToken)
+            );
         }
             
         
-        return AuthResponseDTO.invalidCredentials();
+        return ResponseEntity.ok().body(AuthResponseDTO.invalidCredentials());
     }
 
 
     @PostMapping("refresh")
-    public AuthResponseDTO reauthenticateUser(@RequestBody RefreshRequestDTO request)
-        throws ResponseStatusException {
+    public ResponseEntity<AuthResponseDTO> reauthenticateUser(@RequestBody RefreshRequestDTO request) {
         
         if (request.getRefreshToken() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         String username;
 
@@ -121,24 +120,26 @@ public class AuthController {
             username = jwtService.extractUsername(request.getRefreshToken());
         }
         catch (ExpiredJwtException e) {
-            return AuthResponseDTO.invalidRefreshToken();
+            return ResponseEntity.ok().body(AuthResponseDTO.invalidRefreshToken());
         }
 
         User user = userService.getUserByUsername(username);
 
         if (user == null)
-            return AuthResponseDTO.userNotFound();
+            return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
 
         if (jwtService.validateRefreshToken(request.getRefreshToken(), user)) {
             String token = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
             if (token == null || refreshToken == null)
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
-            return AuthResponseDTO.success(user.getId(), token, refreshToken);
+            return ResponseEntity.ok().body(
+                AuthResponseDTO.success(user.getId(), token, refreshToken)
+            );
         }
         
-        return AuthResponseDTO.invalidCredentials();
+        return ResponseEntity.ok().body(AuthResponseDTO.invalidCredentials());
     }
 }

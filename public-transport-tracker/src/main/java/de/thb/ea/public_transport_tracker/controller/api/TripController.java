@@ -1,7 +1,6 @@
 package de.thb.ea.public_transport_tracker.controller.api;
 
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import de.thb.ea.public_transport_tracker.controller.api.model.TripDTO;
 import de.thb.ea.public_transport_tracker.entity.Trip;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,17 +25,20 @@ public class TripController {
     private TripService tripService;
     
     @GetMapping("trips/nearby")
-    public List<TripDTO> getMethodName(@RequestParam Double latitude, @RequestParam Double longitude)
-        throws ResponseStatusException {
+    public ResponseEntity<List<TripDTO>> getMethodName(
+        @RequestParam Double latitude, @RequestParam Double longitude
+    ) {
         if (latitude == null || longitude == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
 
         List<Trip> trips = tripService.getNearbyTrips(latitude, longitude, 500, 64);
 
         if (trips == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
-        return trips.stream().map(e -> TripDTO.map(e)).collect(Collectors.toList());
+        return ResponseEntity.ok().body(
+            trips.stream().map(e -> TripDTO.map(e)).collect(Collectors.toList())
+        );
     }
     
 
