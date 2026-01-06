@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.service.remote.vbb;
+package de.thb.ea.public_transport_tracker.repository.remote.vbb;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -9,23 +9,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.thb.ea.public_transport_tracker.service.remote.vbb.model.VbbMovement;
-import de.thb.ea.public_transport_tracker.service.remote.vbb.model.VbbRadarResponse;
+import de.thb.ea.public_transport_tracker.repository.remote.vbb.model.VbbMovement;
+import de.thb.ea.public_transport_tracker.repository.remote.vbb.model.VbbRadarResponse;
 import de.thb.ea.public_transport_tracker.util.BoundingBox;
 import de.thb.ea.public_transport_tracker.util.GeoUtils;
 import lombok.AllArgsConstructor;
 
-@Service
+@Repository
 @AllArgsConstructor
-public class VbbService {
+public class VbbRepository {
 
-    private final Logger logger = LoggerFactory.getLogger(VbbService.class);
+    private final Logger logger = LoggerFactory.getLogger(VbbRepository.class);
     
     public static final String API = "https://v6.vbb.transport.rest";
     private final WebClient webClient;

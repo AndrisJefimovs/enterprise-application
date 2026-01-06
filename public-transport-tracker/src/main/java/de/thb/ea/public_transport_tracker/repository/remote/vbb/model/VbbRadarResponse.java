@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.service.remote.vbb.model;
+package de.thb.ea.public_transport_tracker.repository.remote.vbb.model;
 
 import java.util.ArrayList;
 import java.util.List;
