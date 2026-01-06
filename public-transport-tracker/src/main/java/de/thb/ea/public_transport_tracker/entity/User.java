@@ -106,6 +106,22 @@ public class User implements UserDetails {
     }
 
     /**
+     * Check if user has a permission with specified name.
+     * 
+     * @param permissionName    Name of the permission.
+     * @return                  <code>true</code> if it has a permission with the name; otherwise
+     *                          <code>false</code>
+     */
+    public boolean hasPermission(String permissionName) {
+        for (Permission permission : permissions) {
+            if (permission.getName().equals(permissionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * This function returns all granted authorities of a user. Granted authorities can either be
      * roles "ROLE_<ROLE_NAME>" or permissions "PERM_<PERMISSION_NAME>"
      * 
