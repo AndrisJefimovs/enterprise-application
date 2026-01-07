@@ -55,10 +55,20 @@ public class UserService implements UserDetailsService {
     /**
      * Get all users from repository.
      * 
-     * @return list of all users.
+     * @return list of all users or <code>null</code> if something went wrong.
      */
     public List<User> getAllUsers() {
-        return (List<User>) userRepository.findAll();
+        List<User> users;
+
+        try {
+            users = (List<User>) userRepository.findAll();
+        }
+        catch (Exception e) {
+            logger.error("Failed to get all Users from repository: %s", e.toString());
+            return null;
+        }
+
+        return users;
     }
 
 
@@ -196,52 +206,91 @@ public class UserService implements UserDetailsService {
 
     /**
      * Checks if a user with given id exists in repository.
+     * <p>
+     * This function doesn't throw an exception instead it returns <code>null</code> if an error
+     * occures.
      * 
      * @param userId
-     * @return true if user exists; otherwise false
+     * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public boolean userIdExists(Long userId) {
+    public Boolean userIdExists(Long userId) {
         if (userId == null) {
             return false;
         }
-        return userRepository.findById(userId).isPresent();
+        
+        Boolean exists;
+        try {
+            exists = userRepository.existsById(userId);
+        }
+        catch (Exception e) {
+            return null;
+        }
+
+        return exists;
     }
 
     /**
      * This function checks if a user with the given username exists.
+     * <p>
+     * This function doesn't throw an exception instead it returns <code>null</code> if an error
+     * occures.
      * 
      * @param username
-     * @return true if the username exists; otherwise false
+     * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public boolean usernameExists(String username) {
+    public Boolean usernameExists(String username) {
         if (username == null) {
             return false;
         }
-        return userRepository.findByUsername(username).isPresent();
+
+        Boolean exists;
+        try {
+            exists = userRepository.existsByUsername(username);
+        }
+        catch (Exception e) {
+            return null;
+        }
+
+        return exists;
     }
 
     /**
      * This function checks if a user with the given email already exists.
+     * <p>
+     * This function doesn't throw an exception instead it returns <code>null</code> if an error
+     * occures.
      * 
      * @param email
-     * @return true if the email already exists; otherwise false.
+     * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public boolean emailExists(String email) {
+    public Boolean emailExists(String email) {
         if (email == null) {
             return false;
         }
-        return userRepository.findByEmail(email).isPresent();
+
+        Boolean exists;
+        try {
+            exists = userRepository.existsByEmail(email);
+        }
+        catch (Exception e) {
+            return null;
+        }
+
+        return exists;
     }
 
     /**
      * This method updates and returns a new valid refresh version number of an user.
      * 
      * @param user
-     * @return New refresh version or null if something went wrong.
+     * @return New refresh version or <code>null</code> if something went wrong.
      */
     public Integer nextRefreshVersion(User user) {
         user.setRefreshVersion(user.getRefreshVersion() + 1);
-        if (updateUser(user) == null) {
+
+        user = updateUser(user);
+
+        if (user == null) {
             return null;
         }
         return user.getRefreshVersion();
@@ -252,7 +301,7 @@ public class UserService implements UserDetailsService {
      * 
      * @param id
      * @param username
-     * @return true if the user with id has the username.
+     * @return true if the user with given id has the username.
      */
     public boolean isIdOfUser(Long id, String username) {
         User user = getUserById(id);

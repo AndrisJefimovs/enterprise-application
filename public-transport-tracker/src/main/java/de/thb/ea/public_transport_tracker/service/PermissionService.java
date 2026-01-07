@@ -125,7 +125,7 @@ public class PermissionService {
         if (permissionName == null) {
             return false;
         }
-        return permissionRepository.findByName(permissionName).isPresent();
+        return permissionRepository.existsByName(permissionName);
     }
 
 }

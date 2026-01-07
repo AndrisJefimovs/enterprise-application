@@ -11,5 +11,7 @@ import de.thb.ea.public_transport_tracker.entity.Permission;
 public interface PermissionRepository extends CrudRepository<Permission, Long> {
 
     Optional<Permission> findByName(String name);
+
+    boolean existsByName(String name);
     
 }
