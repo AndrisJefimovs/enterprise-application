@@ -10,6 +10,8 @@ import de.thb.ea.public_transport_tracker.entity.Trip;
 import de.thb.ea.public_transport_tracker.repository.TripRepository;
 import de.thb.ea.public_transport_tracker.repository.remote.vbb.VbbRepository;
 import de.thb.ea.public_transport_tracker.repository.remote.vbb.model.VbbMovement;
+import de.thb.ea.public_transport_tracker.service.exception.TripAlreadyExistsException;
+import de.thb.ea.public_transport_tracker.service.exception.TripNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -20,46 +22,62 @@ public class TripService {
     private final TripRepository tripRepository;
 
 
-    public Trip getTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId) {
-        if (remoteId == null || remoteOrigin == null) {
-            return null;
+    public Trip getTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId)
+        throws TripNotFoundException
+    {
+        if (remoteId == null) {
+            throw new IllegalArgumentException("null is not a valid value for remoteId");
         }
+        if (remoteOrigin == null) {
+            throw new IllegalArgumentException("null is not a valid value for remoteOrigin");
+        }
+
         Optional<Trip> trip = tripRepository.findTripByRemoteOriginAndRemoteId(
             remoteOrigin, remoteId
         );
 
-        if (trip.isPresent()) {
-            return trip.get();
+        if (trip.isEmpty()) {
+            throw TripNotFoundException.fromRemote(remoteOrigin, remoteId);
         }
-        return null;
+        return trip.get();
     }
 
 
-    public Trip addNewTrip(Trip trip) {
+    public Trip addNewTrip(Trip trip) throws TripAlreadyExistsException {
         if (trip == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for trip");
         }
-        trip.forgetId();
+
+        if (remoteTripExists(trip.getRemoteOrigin(), trip.getRemoteId())) {
+            throw TripAlreadyExistsException.fromRemote(trip.getRemoteOrigin(), trip.getRemoteId());
+        }
+
+        trip.forgetId(); // prevent updating existing trip
         try {
             trip = tripRepository.save(trip);
         }
         catch (Exception e) {
-            return null;
+            throw e;
         }
 
         return trip;
     }
 
 
-    public Trip updateTrip(Trip trip) {
+    public Trip updateTrip(Trip trip) throws TripNotFoundException {
         if (trip == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for trip");
         }
+
+        if (!tripIdExists(trip.getId())) {
+            throw TripNotFoundException.fromId(trip.getId());
+        }
+
         try {
             trip = tripRepository.save(trip);
         }
         catch (Exception e) {
-            return null;
+            throw e;
         }
 
         return trip;
@@ -69,41 +87,42 @@ public class TripService {
     public List<Trip> getNearbyTrips(double latitude, double longitude, double radius, int n) {
         List<VbbMovement> movements = vbbService.getNearbyMovements(latitude, longitude, radius, n);
 
-        if (movements == null) {
-            return null;
-        }
-
         List<Trip> trips = new ArrayList<>();
         for (VbbMovement movement : movements) {
-            Trip trip = getTripByRemoteOriginAndRemoteId("vbb", movement.getTripId());
-            
-            // no trip found in repo
-            if (trip == null) {
-                trip = addNewTrip(
-                    Trip.builder()
-                        .remoteId(movement.getTripId())
-                        .remoteOrigin("vbb")
-                        .direction(movement.getDirection())
-                        .lineName(movement.getLine().getName())
-                        .type(movement.getLine().getProduct())
-                        .build()
+            try {
+                // load trip from database
+                trips.add(
+                    getTripByRemoteOriginAndRemoteId("vbb", movement.getTripId())
                 );
-                // error
-                if (trip == null) {
-                    return null;
+            }
+            catch (TripNotFoundException e) {
+                try {
+                    // create new trip in database
+                    trips.add(addNewTrip(
+                        Trip.builder()
+                            .remoteId(movement.getTripId())
+                            .remoteOrigin("vbb")
+                            .direction(movement.getDirection())
+                            .lineName(movement.getLine().getName())
+                            .type(movement.getLine().getProduct())
+                            .build()
+                    ));
+                }
+                catch (TripAlreadyExistsException _e) {
+                    // should not happen since TripNotFoundException
+                    // TODO: add logging and maybe throw RuntimeException
                 }
             }
-            
-            trip = updateTrip(trip);
-
-            // error
-            if (trip == null) {
-                return null;
-            }
-
-            trips.add(trip);
         }
 
         return trips;
+    }
+
+    public boolean remoteTripExists(String remoteOrigin, String remoteId) {
+        return tripRepository.existsByRemoteOriginAndRemoteId(remoteOrigin, remoteId);
+    }
+
+    public boolean tripIdExists(Long tripId) {
+        return tripRepository.existsById(tripId);
     }
 }

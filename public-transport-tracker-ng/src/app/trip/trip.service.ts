@@ -1,15 +1,16 @@
 import { Injectable } from "@angular/core";
 import { LocationService } from "../core/location.service";
-import { catchError, Observable, of, switchMap } from "rxjs";
-import { HttpClient, HttpParams, HttpResponse } from "@angular/common/http";
+import { Observable, switchMap } from "rxjs";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { ITrip } from "./model/trip";
+import { environment } from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root'
 })
 export class TripService {
 
-    private readonly API: string = "https://ptt.emx-studios.dev/api/v1/trips";
+    private readonly API: string = environment.apiBaseUrl + "/api/v1/trips";
 
     constructor(
         private locationService: LocationService,

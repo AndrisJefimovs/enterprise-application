@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.Permission;
 import de.thb.ea.public_transport_tracker.repository.PermissionRepository;
+import de.thb.ea.public_transport_tracker.service.exception.PermissionAlreadyExistsException;
+import de.thb.ea.public_transport_tracker.service.exception.PermissionNotFoundException;
 
 @Service
 public class PermissionService {
@@ -33,16 +35,23 @@ public class PermissionService {
     /**
      * Get permission instance by name.
      * 
-     * @param permissionName
-     * @return Permission or null if no permission with name exists.
+     * @param permissionName    Name of the permission.
+     * @return                  Permission instance
+     * @throws PermissionNotFoundException if no permission with name exists in repository
      */
-    public Permission getPermissionByName(String permissionName) {
+    public Permission getPermissionByName(String permissionName)
+        throws PermissionNotFoundException
+    {
+        if (permissionName == null) {
+            throw new IllegalArgumentException("null is not a valid value for permissionName");
+        }
+
         Optional<Permission> permission = permissionRepository.findByName(permissionName);
 
-        if (permission.isPresent()) {
-            return permission.get();
+        if (permission.isEmpty()) {
+            throw PermissionNotFoundException.fromName(permissionName);
         }
-        return null;
+        return permission.get();
     }
 
 
@@ -50,12 +59,16 @@ public class PermissionService {
      * Create and add new permission by name.
      * 
      * @param permissionName
-     * @return Permission or null if failed.
+     * @return Permission instance
+     * @throws PermissionAlreadyExists if there already is a permission with the given name
      */
-    public Permission addNewPermission(String permissionName) {
+    public Permission addNewPermission(String permissionName)
+        throws PermissionAlreadyExistsException
+    {
         if (permissionName == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for permissionName");
         }
+        
         return addNewPermission(Permission.builder().name(permissionName).build());
     }
 
@@ -64,28 +77,34 @@ public class PermissionService {
      * Add a new permission to the repository.
      * 
      * @param permission
-     * @return Permission or null if failed.
+     * @return Permission instance
      */
-    public Permission addNewPermission(Permission permission) {
+    public Permission addNewPermission(Permission permission)
+        throws PermissionAlreadyExistsException
+    {
         if (permission == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for permission");
         }
+        if (permissionExists(permission.getName())) {
+            throw PermissionAlreadyExistsException.fromName(permission.getName());
+        }
+
         permission.forgetId();
 
         try {
             permissionRepository.save(permission);
         }
         catch (Exception e) {
-            logger.info(String.format(
+            logger.info(
                 "Failed to create new permission with name '%s'", permission.getName()
-            ));
+            );
             logger.debug(e.toString());
-            return null;
+            throw e;
         }
-        logger.info(String.format(
+        logger.info(
             "Successfully created new permission '%s' with id %d",
             permission.getName(), permission.getId()
-        ));
+        );
         return permission;
     }
 
@@ -94,11 +113,11 @@ public class PermissionService {
      * Delete a specific permission from repository.
      * 
      * @param permission
-     * @return The deleted permission or null if failed.
+     * @throws PermissionNotFoundException if permission doesn't exist in repository
      */
-    public Permission deletePermission(Permission permission) {
+    public void deletePermission(Permission permission) {
         if (permission == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for permission");
         }
 
         try {
@@ -107,11 +126,10 @@ public class PermissionService {
         catch (Exception e) {
             logger.info(String.format("Failed to delete permission '%s'", permission.getName()));
             logger.debug(e.toString());
-            return permission;
+            throw e;
         }
 
         logger.info(String.format("Successfully deleted permission '%s'", permission.getName()));
-        return permission;
     }
 
 
@@ -123,7 +141,7 @@ public class PermissionService {
      */
     public boolean permissionExists(String permissionName) {
         if (permissionName == null) {
-            return false;
+            throw new IllegalArgumentException("null is not a valid value for permissionName");
         }
         return permissionRepository.existsByName(permissionName);
     }

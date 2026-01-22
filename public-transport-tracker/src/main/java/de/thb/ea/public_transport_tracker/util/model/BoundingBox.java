@@ -1,4 +1,4 @@
-package de.thb.ea.public_transport_tracker.util;
+package de.thb.ea.public_transport_tracker.util.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -13,21 +13,20 @@ import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.repository.UserRepository;
+import de.thb.ea.public_transport_tracker.service.exception.EmailAlreadyExistsException;
+import de.thb.ea.public_transport_tracker.service.exception.UserNotFoundException;
+import de.thb.ea.public_transport_tracker.service.exception.UsernameAlreadyExistsException;
+import lombok.AllArgsConstructor;
 
 
 @Service
+@AllArgsConstructor
 public class UserService implements UserDetailsService {
     
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this. passwordEncoder = passwordEncoder;
-    }
-
 
     /**
      * Get UserDetails by username.
@@ -40,14 +39,19 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if (username == null) {
-            throw new UsernameNotFoundException("null is not a valid username.");
+            throw new IllegalArgumentException("null is not a valid value for username");
         }
-        User user = getUserByUsername(username);
-        if (user == null) {
+
+        User user;
+        try {
+            user = getUserByUsername(username);
+        }
+        catch (UserNotFoundException e) {
             throw new UsernameNotFoundException(
                 String.format("No user found with username '%s'", username)
             );
         }
+
         return user;
     }
 
@@ -55,7 +59,7 @@ public class UserService implements UserDetailsService {
     /**
      * Get all users from repository.
      * 
-     * @return list of all users or <code>null</code> if something went wrong.
+     * @return list of all users
      */
     public List<User> getAllUsers() {
         List<User> users;
@@ -64,8 +68,8 @@ public class UserService implements UserDetailsService {
             users = (List<User>) userRepository.findAll();
         }
         catch (Exception e) {
-            logger.error("Failed to get all Users from repository: %s", e.toString());
-            return null;
+            logger.error("Failed to get users from repository.");
+            throw e;
         }
 
         return users;
@@ -75,34 +79,43 @@ public class UserService implements UserDetailsService {
     /**
      * Get user by id.
      * 
-     * @param id User id.
-     * @return user or null if no user with this id exists.
+     * @param id    User id.
+     * @return      user
+     * @throws UserNotFoundException if user is not present in repository
      */
-    public User getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-
-        if (user.isPresent()) {
-            return user.get();
+    public User getUserById(Long id) throws UserNotFoundException {
+        if (id == null) {
+            throw new IllegalArgumentException("null is not a valid value for id");
         }
 
-        return null;
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isEmpty()) {
+            throw UserNotFoundException.fromUserId(id);
+        }
+
+        return user.get();
     }
 
 
     /**
      * Get user by username.
      * 
-     * @param username Username of the user.
-     * @return user or null if failed.
+     * @param username  Username of the user.
+     * @return          user
+     * @throws UserNotFoundException if user is not present in repository
      */
-    public User getUserByUsername(String username) {
+    public User getUserByUsername(String username) throws UserNotFoundException {
         if (username == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for username");
         }
+
         Optional<User> user = userRepository.findByUsername(username);
+        
         if (user.isEmpty()) {
-            return null;
+            throw UserNotFoundException.fromUsername(username);
         }
+
         return user.get();
     }
 
@@ -111,29 +124,44 @@ public class UserService implements UserDetailsService {
      * This function returns the user assotiated with the email address.
      * 
      * @param email Email address of the user.
-     * @return user of null if failed.
+     * @return      user
+     * @throws UserNotFoundException if user is not present in repository
      */
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(String email) throws UserNotFoundException {
         if (email == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for email");
         }
+
         Optional<User> user = userRepository.findByEmail(email);
+        
         if (user.isEmpty()) {
-            return null;
+            throw UserNotFoundException.fromEmail(email);
         }
+
         return user.get();
     }
 
     /**
      * This function tries to add an user to the repository.
      * 
-     * @param user The user that should be added to the repository.
-     * @return The added user instance or null if failed.
+     * @param user  The user that should be added to the repository.
+     * @return      The added user instance
+     * @throws UsernameAlreadyExistsException if username is already used by another user
+     * @throws EmailAlreadyExistsException if email is already used by another user
      */
-    public User addNewUser(User user) {
+    public User addNewUser(User user)
+        throws UsernameAlreadyExistsException, EmailAlreadyExistsException
+    {
         if (user == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for user");
         }
+        if (usernameExists(user.getUsername())) {
+            throw UsernameAlreadyExistsException.fromUsername(user.getUsername());
+        }
+        if (user.getEmail() != null && emailExists(user.getEmail())) {
+            throw EmailAlreadyExistsException.fromEmail(user.getEmail());
+        }
+
         user.forgetId(); // prevent updating existing users
         user.setPassword(passwordEncoder.encode(user.getPassword())); // hash password
         try {
@@ -142,7 +170,7 @@ public class UserService implements UserDetailsService {
         catch (Exception e) {
             logger.info(String.format("Failed to create new user '%s'", user.getUsername()));
             logger.debug(e.toString());
-            return null;
+            throw e;
         }
         logger.info(String.format(
             "Successfully created new user '%s' with id %d", user.getUsername(), user.getId()
@@ -151,29 +179,38 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Tries to update a user if it exists.
+     * Update an existing user.
+     * <p>
+     * To update the password just set the passord attribute to the new cleartext password
      * 
-     * @param user
-     * @return updated user instance or null if failed.
+     * @param user  user instance with changed properties; it is identified by id
+     * @return      updated user instance
+     * @throws UserNotFoundException if the user doesn't exist
+     * TODO: fix problem of new password equals old password hash
      */
-    public User updateUser(User user) {
+    public User updateUser(User user) throws UserNotFoundException {
         if (user == null) {
-            return null;
+            throw new IllegalArgumentException("null is not a valid value for user");
         }
+
+        User originalUser = getUserById(user.getId());
+
+        // check if password has changed
+        if (
+            originalUser.getPassword() != null
+            && !originalUser.getPassword().equals(user.getPassword())
+        )
+        {
+            // encode the new password
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         try {
-            User oldUser = getUserById(user.getId());
-            if (oldUser != null) {
-                if (
-                    user.getPassword() != null &&
-                    !user.getPassword().equals(oldUser.getPassword())
-                ) {
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
-                }
-                user = userRepository.save(user);
-            }
+            user = userRepository.save(user);
         }
         catch (Exception e) {
-            return null;
+            // TODO: do some logging
+            throw e;
         }
         return user;
     }
@@ -181,118 +218,72 @@ public class UserService implements UserDetailsService {
     /**
      * Delete a user from the repository.
      * 
-     * @param user The user to delete.
-     * @return The deleted user instance or null if failed.
+     * @param user  The user to delete.
+     * @throws UserNotFoundException if user wasn't found
      */
-    public User deleteUser(User user) {
+    public void deleteUser(User user) throws UserNotFoundException {
         if (user == null) {
-            return null;
+            throw new IllegalArgumentException("Cannot delete user when it is null");
         }
+
+        if (!userIdExists(user.getId())) {
+            throw UserNotFoundException.fromUserId(user.getId());
+        }
+
         try {
             userRepository.delete(user);
         }
         catch (Exception e) {
-            logger.info(String.format(
+            logger.info(
                 "Failed to delete user '%s' with id %d", user.getUsername(), user.getId()
-            ));
+            );
             logger.debug(e.toString());
-            return null;
+            throw e;
         }
-        logger.info(String.format(
-            "Deleted user '%s' with id %d", user.getUsername(), user.getId()
-        ));
-        return user;
+
+        logger.info("Deleted user '%s' with id %d", user.getUsername(), user.getId());
     }
 
     /**
      * Checks if a user with given id exists in repository.
-     * <p>
-     * This function doesn't throw an exception instead it returns <code>null</code> if an error
-     * occures.
      * 
      * @param userId
      * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public Boolean userIdExists(Long userId) {
-        if (userId == null) {
-            return false;
-        }
-        
-        Boolean exists;
-        try {
-            exists = userRepository.existsById(userId);
-        }
-        catch (Exception e) {
-            return null;
-        }
-
-        return exists;
+    public boolean userIdExists(Long userId) {
+        return userRepository.existsById(userId);
     }
 
     /**
      * This function checks if a user with the given username exists.
-     * <p>
-     * This function doesn't throw an exception instead it returns <code>null</code> if an error
-     * occures.
      * 
      * @param username
      * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public Boolean usernameExists(String username) {
-        if (username == null) {
-            return false;
-        }
-
-        Boolean exists;
-        try {
-            exists = userRepository.existsByUsername(username);
-        }
-        catch (Exception e) {
-            return null;
-        }
-
-        return exists;
+    public boolean usernameExists(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     /**
      * This function checks if a user with the given email already exists.
-     * <p>
-     * This function doesn't throw an exception instead it returns <code>null</code> if an error
-     * occures.
      * 
      * @param email
      * @return <code>true</code> if user exists; otherwise <code>false</code>.
      */
-    public Boolean emailExists(String email) {
-        if (email == null) {
-            return false;
-        }
-
-        Boolean exists;
-        try {
-            exists = userRepository.existsByEmail(email);
-        }
-        catch (Exception e) {
-            return null;
-        }
-
-        return exists;
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     /**
      * This method updates and returns a new valid refresh version number of an user.
      * 
-     * @param user
-     * @return New refresh version or <code>null</code> if something went wrong.
+     * @param user  The user you want to get the new refresh version of.
+     * @return      New refresh version
+     * @throws UserNotFoundException if user doesn't exist in repository
      */
-    public Integer nextRefreshVersion(User user) {
+    public Integer nextRefreshVersion(User user) throws UserNotFoundException {
         user.setRefreshVersion(user.getRefreshVersion() + 1);
-
         user = updateUser(user);
-
-        if (user == null) {
-            return null;
-        }
         return user.getRefreshVersion();
     }
 
@@ -301,13 +292,10 @@ public class UserService implements UserDetailsService {
      * 
      * @param id
      * @param username
-     * @return true if the user with given id has the username.
+     * @return          true if the user with given id has the username.
      */
-    public boolean isIdOfUser(Long id, String username) {
+    public boolean isIdOfUser(Long id, String username) throws UserNotFoundException {
         User user = getUserById(id);
-        if (user == null) {
-            return false;
-        }
         return user.getUsername().equals(username);
     }
 

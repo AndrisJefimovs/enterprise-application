@@ -81,12 +81,6 @@ public class User implements UserDetails {
     @Setter
     private Integer refreshVersion = 0;
 
-    @Column(name = "login_enabled")
-    @Setter
-    @Default
-    private Boolean loginEnabled = true;
-
-
     /**
      * This method can be used to ensure that the user object has no id. This way a new id is
      * generated when saving it to the database.
@@ -163,6 +157,6 @@ public class User implements UserDetails {
     }
 
     public boolean isLoginEnabled() {
-        return loginEnabled && password != null;
+        return password != null && hasPermission("LOGIN");
     }
 }

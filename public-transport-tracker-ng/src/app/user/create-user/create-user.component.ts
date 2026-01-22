@@ -45,7 +45,7 @@ export class CreateUserComponent implements OnInit {
         
         return this.fb.array(
             // on default all permissions are disabled
-            this.permissions.map(p => this.fb.control(false))
+            this.permissions.filter(p => p !== "LOGIN").map(p => this.fb.control(false))
         );
     }
 
@@ -81,13 +81,15 @@ export class CreateUserComponent implements OnInit {
                 checked ? this.permissions[i] : null
             )
             .filter((v: string | null) => v !== null);
+        if (formValue.loginEnabled) {
+            selectedPermissions.push("LOGIN");
+        }
 
         const user: IUser = structuredClone(this.user);
         user.username = formValue.username;
         user.email = formValue.email;
         user.permissions = selectedPermissions;
         user.password = formValue.password;
-        user.loginEnabled = formValue.loginEnabled;
 
         this.userService.createUser(user).subscribe({
             next: (res) => {

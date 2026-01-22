@@ -12,4 +12,6 @@ public interface TripRepository extends CrudRepository<Trip, Long>  {
     
     Optional<Trip> findTripByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId);
 
+    boolean existsByRemoteOriginAndRemoteId(String remoteOrigin, String remoteId);
+
 }

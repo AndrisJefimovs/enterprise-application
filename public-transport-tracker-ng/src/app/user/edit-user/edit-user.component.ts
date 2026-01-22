@@ -70,7 +70,7 @@ export class EditUserComponent implements OnInit {
 
     private buildPermissionsArray(): FormArray {
         return this.fb.array(
-            this.allPermissions.map(permission => {
+            this.allPermissions.filter(p => p !== "LOGIN").map(permission => {
                 const control = this.fb.control(
                     this.user.permissions?.includes(permission)
                 );
@@ -99,7 +99,7 @@ export class EditUserComponent implements OnInit {
             password: [null],
             passwordConfirm: [null],
             permissions: this.buildPermissionsArray(),
-            loginEnabled: this.fb.control(this.user.loginEnabled)
+            loginEnabled: this.fb.control(this.user.permissions?.includes("LOGIN") ?? false)
         });
 
         // password fields are initially disabled
@@ -154,7 +154,6 @@ export class EditUserComponent implements OnInit {
     ): boolean {
         if (formValue.username !== user.username) return true;
         if (formValue.email !== user.email) return true;
-        if (formValue.loginEnabled !== user.loginEnabled) return true;
 
         // Passwort nur prüfen, wenn eingegeben
         if (formValue.password && formValue.password.length > 0) return true;
@@ -185,6 +184,9 @@ export class EditUserComponent implements OnInit {
                 checked ? this.allPermissions[i] : null
             )
             .filter((v: string | null) => v !== null);
+        if (formValue.loginEnabled) {
+            selectedPermissions.push("LOGIN")
+        }
 
         // do nothing if nothing was changed
         if (!this.hasChanges(formValue, selectedPermissions, this.user)) {
@@ -201,12 +203,17 @@ export class EditUserComponent implements OnInit {
             return;
         }
 
-        const user: IUser = structuredClone(this.user);
-        user.username = formValue.username;
-        user.email = formValue.email;
-        user.permissions = selectedPermissions;
+        const user: IUser = {id: this.user.id};
+        if (this.user.username !== formValue.username) {
+            user.username = formValue.username;
+        }
+        if (this.user.email !== formValue.email) {
+            user.email = formValue.email;
+        }
+        if (this.user.permissions !== selectedPermissions) {
+            user.permissions = selectedPermissions;
+        }
         user.password = formValue.password;
-        user.loginEnabled = formValue.loginEnabled;
 
         this.userService.updateUser(user).subscribe({
             next: (res) => {
@@ -243,7 +250,7 @@ export class EditUserComponent implements OnInit {
         this.form.get('username')?.setValue(this.user.username);
         this.form.get('email')?.setValue(this.user.email);
         this.form.setControl('permissions', this.buildPermissionsArray());
-        this.form.get('loginEnabled')?.setValue(this.user.loginEnabled);
+        this.form.get('loginEnabled')?.setValue(this.user.permissions?.includes("LOGIN") ?? false);
 
         this.disablePasswordChange();
 

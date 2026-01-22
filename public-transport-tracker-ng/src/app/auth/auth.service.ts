@@ -6,6 +6,7 @@ import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { TokenService } from '../core/token.service';
 import { IUser } from '../user/model/user';
 import { UserService } from '../user/user.service';
+import { environment } from '../../environments/environment';
 
 const USER_ID_KEY: string = 'USER_ID';
 
@@ -14,7 +15,7 @@ const USER_ID_KEY: string = 'USER_ID';
 })
 export class AuthService {
   
-    private readonly API: string = 'https://ptt.emx-studios.dev/auth';
+    private readonly API: string = environment.apiBaseUrl + '/auth';
 
     private userSubject = new BehaviorSubject<IUser|null>(null);
     readonly user$ = this.userSubject.asObservable();

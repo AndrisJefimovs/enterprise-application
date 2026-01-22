@@ -1,5 +1,8 @@
 package de.thb.ea.public_transport_tracker.controller.auth;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,9 +18,15 @@ import de.thb.ea.public_transport_tracker.controller.auth.model.LoginRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RefreshRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterRequestDTO;
 import de.thb.ea.public_transport_tracker.controller.auth.model.RegisterResponseDTO;
+import de.thb.ea.public_transport_tracker.entity.Permission;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.JwtService;
+import de.thb.ea.public_transport_tracker.service.PermissionService;
 import de.thb.ea.public_transport_tracker.service.UserService;
+import de.thb.ea.public_transport_tracker.service.exception.EmailAlreadyExistsException;
+import de.thb.ea.public_transport_tracker.service.exception.PermissionNotFoundException;
+import de.thb.ea.public_transport_tracker.service.exception.UserNotFoundException;
+import de.thb.ea.public_transport_tracker.service.exception.UsernameAlreadyExistsException;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 
@@ -28,6 +37,7 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final PermissionService permissionService;
     private final AuthenticationManager authenticationManager;
 
     
@@ -43,23 +53,31 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (userService.usernameExists(request.getUsername())) {
+        Set<Permission> permissions = new HashSet<>();
+        try {
+            permissions.add(permissionService.getPermissionByName("LOGIN"));
+        }
+        catch (PermissionNotFoundException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        try {
+            userService.addNewUser(
+                User.builder()
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .password(request.getPassword())
+                    .permissions(permissions)
+                    .build()
+            );
+        }
+        catch (UsernameAlreadyExistsException e) {
             return ResponseEntity.ok().body(RegisterResponseDTO.usernameAlreadyTaken());
         }
-
-        if (userService.emailExists(request.getEmail())) {
+        catch (EmailAlreadyExistsException e) {
             return ResponseEntity.ok().body(RegisterResponseDTO.emailAlreadyTaken());
         }
-
-        User user = userService.addNewUser(
-            User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .build()
-        );
-
-        if (user == null) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
 
@@ -78,18 +96,19 @@ public class AuthController {
         }
 
         User user;
-        switch (request.getIdentifierType()) {
-            case USERNAME:
-                user = userService.getUserByUsername(request.getIdentifier());
-                break;
-            case EMAIL:
-                user = userService.getUserByEmail(request.getIdentifier());
-                break;
-            default:
-                return ResponseEntity.badRequest().build();
+        try {
+            switch (request.getIdentifierType()) {
+                case USERNAME:
+                    user = userService.getUserByUsername(request.getIdentifier());
+                    break;
+                case EMAIL:
+                    user = userService.getUserByEmail(request.getIdentifier());
+                    break;
+                default:
+                    return ResponseEntity.badRequest().build();
+            }
         }
-
-        if (user == null) {
+        catch (UserNotFoundException e) {
             return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
         }
 
@@ -105,16 +124,17 @@ public class AuthController {
         );
 
         if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
-
-            if (token == null || refreshToken == null) {
+            try {
+                String token = jwtService.generateToken(user);
+                String refreshToken = jwtService.generateRefreshToken(user);
+                
+                return ResponseEntity.ok().body(
+                    AuthResponseDTO.success(user.getId(), token, refreshToken)
+                );
+            }
+            catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-
-            return ResponseEntity.ok().body(
-                AuthResponseDTO.success(user.getId(), token, refreshToken)
-            );
         }
         
         return ResponseEntity.ok().body(AuthResponseDTO.invalidCredentials());
@@ -129,32 +149,30 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
 
-        String username;
-
+        User user;
         try {
-            username = jwtService.extractUsername(request.getRefreshToken());
+            String username = jwtService.extractUsername(request.getRefreshToken());
+            user = userService.getUserByUsername(username);
         }
         catch (ExpiredJwtException e) {
             return ResponseEntity.ok().body(AuthResponseDTO.invalidRefreshToken());
         }
-
-        User user = userService.getUserByUsername(username);
-
-        if (user == null) {
+        catch (UserNotFoundException e) {
             return ResponseEntity.ok().body(AuthResponseDTO.userNotFound());
         }
 
         if (jwtService.validateRefreshToken(request.getRefreshToken(), user)) {
-            String token = jwtService.generateToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
+            try {
+                String token = jwtService.generateToken(user);
+                String refreshToken = jwtService.generateRefreshToken(user);
 
-            if (token == null || refreshToken == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                return ResponseEntity.ok().body(
+                    AuthResponseDTO.success(user.getId(), token, refreshToken)
+                );
             }
-
-            return ResponseEntity.ok().body(
-                AuthResponseDTO.success(user.getId(), token, refreshToken)
-            );
+            catch (Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
         }
         
         return ResponseEntity.ok().body(AuthResponseDTO.invalidCredentials());

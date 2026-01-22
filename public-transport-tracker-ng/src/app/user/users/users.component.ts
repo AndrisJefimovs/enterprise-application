@@ -36,7 +36,7 @@ export class UsersComponent implements OnInit {
         this.userService.deleteUser(userId).subscribe({
             next: (res) => {
                 this.users = this.users.filter(
-                    user => user.id !== res.body?.id
+                    user => user.id !== userId
                 )
             },
             error: (err) => {} // dont throw error to console

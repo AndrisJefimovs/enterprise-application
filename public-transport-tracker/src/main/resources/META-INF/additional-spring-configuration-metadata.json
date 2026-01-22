@@ -23,6 +23,10 @@
         {
             "name": "application.admin.password",
             "description": "The password for default admin user."
+        },
+        {
+            "name": "application.http-url",
+            "description": "The real base URL used to access the spring boot server. If a reverse proxy is used its address should be set here."
         }
     ]
 }

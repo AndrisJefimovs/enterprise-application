@@ -1,7 +1,6 @@
 package de.thb.ea.public_transport_tracker.repository.remote.vbb;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,8 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.thb.ea.public_transport_tracker.repository.remote.vbb.model.VbbMovement;
 import de.thb.ea.public_transport_tracker.repository.remote.vbb.model.VbbRadarResponse;
-import de.thb.ea.public_transport_tracker.util.BoundingBox;
 import de.thb.ea.public_transport_tracker.util.GeoUtils;
+import de.thb.ea.public_transport_tracker.util.model.BoundingBox;
 import lombok.AllArgsConstructor;
 
 @Repository
@@ -65,19 +64,19 @@ public class VbbRepository {
             logger.warn(String.format(
                 "Request '%s' failed with error: %s", uri.toString(), e.toString()
             ));
-            return null;
+            return List.of();
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {
             logger.info(String.format(
                 "Request '%s' failed with HttpStatus %d", uri.toString(), response.getStatusCode()
             ));
-            return null;
+            return List.of();
         }
 
-        // check if response is empty list
-        if ("[]".equals(response.getBody())) {
-            return new ArrayList<>();
+        // check if response is empty
+        if (response.getBody() == null || response.getBody().equals("[]")) {
+            return List.of();
         }
 
         VbbRadarResponse radarResponse;
@@ -87,11 +86,12 @@ public class VbbRepository {
             );
         }
         catch (Exception e) {
-            logger.warn(
+            logger.error(
                 "Failed to map '%s' to VbbRadarResponse: %s",
                 response.getBody(), e.getMessage()
             );
-            return null;
+            // TODO: throw a RemoteRepositoryException
+            return List.of();
         }
         
         return radarResponse

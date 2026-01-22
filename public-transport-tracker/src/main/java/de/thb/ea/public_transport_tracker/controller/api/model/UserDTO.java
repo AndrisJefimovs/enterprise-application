@@ -24,7 +24,6 @@ public class UserDTO {
     private Instant createdAt;
     private Instant updatedAt;
     private Integer refreshVersion;
-    private Boolean loginEnabled;
 
     public static UserDTO map(User user) {
         Long createdBy = null;
@@ -42,7 +41,6 @@ public class UserDTO {
             .createdAt(user.getCreatedAt())
             .updatedAt(user.getUpdatedAt())
             .refreshVersion(user.getRefreshVersion())
-            .loginEnabled(user.isLoginEnabled())
             .build();
     }
 }

@@ -1,5 +1,8 @@
 package de.thb.ea.public_transport_tracker.util;
 
+import de.thb.ea.public_transport_tracker.util.model.BoundingBox;
+import de.thb.ea.public_transport_tracker.util.model.Location;
+
 /**
  * This class provides common functions used for geo location.
  */

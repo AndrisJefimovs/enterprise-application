@@ -16,14 +16,19 @@
                 </li>
             }
             @if (user.permissions && user.permissions.length > 0) {
-                <li>
-                    <h1>Berechtigungen</h1>
-                    <span>
-                        @for (permission of user.permissions; track permission) {
-                            <span>{{ permission.replace("_", " ").toLowerCase() }}</span><br>
-                        }
-                    </span>
-                </li>
+                @if (user.permissions.length > 1 || !user.permissions.includes("LOGIN")) {
+                    <li>
+                        <h1>Berechtigungen</h1>
+                        <span>
+                            @for (permission of user.permissions; track permission) {
+                                @if (permission !== "LOGIN") {
+                                    <span>{{ permission.replace("_", " ").toLowerCase() }}</span>
+                                    <br>
+                                }
+                            }
+                        </span>
+                    </li>
+                }
             }
             @if (creator) {
                 <li>
@@ -51,11 +56,11 @@
                     <span>{{ user.refreshVersion }}</span>
                 </li>
             }
-            @if (user.loginEnabled !== undefined && user.loginEnabled !== null) {
+            @if (user.permissions !== undefined && user.permissions !== null) {
                 <li>
                     <h1>Login Erlaubt</h1>
                     <span>
-                        @if (user.loginEnabled) {
+                        @if (user.permissions.includes("LOGIN")) {
                             Ja
                         }
                         @else {

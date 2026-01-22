@@ -2,13 +2,14 @@ import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { IUser } from "./model/user";
+import { environment } from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root'
 })
 export class UserService {
 
-    private readonly API: string = "https://ptt.emx-studios.dev/api/v1/users"
+    private readonly API: string = environment.apiBaseUrl + "/api/v1/users"
 
     private users: IUser[] = []
 
@@ -23,7 +24,7 @@ export class UserService {
     }
 
     public updateUser(user: IUser): Observable<HttpResponse<IUser>> {
-        return this.httpClient.put<IUser>(this.API + "/" + user.id, user, { observe: 'response' });
+        return this.httpClient.patch<IUser>(this.API + "/" + user.id, user, { observe: 'response' });
     }
 
     public createUser(user: IUser): Observable<HttpResponse<IUser>> {

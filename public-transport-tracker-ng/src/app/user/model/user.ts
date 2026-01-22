@@ -7,6 +7,5 @@ export interface IUser {
     createdBy?: number | null,
     createdAt?: string | null,
     updatedAt?: string | null,
-    refreshVersion?: number | null,
-    loginEnabled?: boolean | null
+    refreshVersion?: number | null
 }

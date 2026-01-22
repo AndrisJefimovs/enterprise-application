@@ -63,12 +63,14 @@
 
                     <ul formArrayName="permissions" class="permissions">
                         @for (perm of allPermissions; track $index; let i = $index) {
-                            <li>
-                                <label class="permission-item">
-                                    <input type="checkbox" [formControlName]="i">
-                                    <span>{{ perm }}</span>
-                                </label>
-                            </li>
+                            @if (perm !== "LOGIN") {
+                                <li>
+                                    <label class="permission-item">
+                                        <input type="checkbox" [formControlName]="i">
+                                        <span>{{ perm }}</span>
+                                    </label>
+                                </li>
+                            }
                         }
                     </ul>
                 </div>

@@ -14,6 +14,8 @@ import de.thb.ea.public_transport_tracker.entity.Permission;
 import de.thb.ea.public_transport_tracker.entity.User;
 import de.thb.ea.public_transport_tracker.service.PermissionService;
 import de.thb.ea.public_transport_tracker.service.UserService;
+import de.thb.ea.public_transport_tracker.service.exception.UserAlreadyExists;
+import de.thb.ea.public_transport_tracker.service.exception.UserNotFoundException;
 
 
 @Component
@@ -25,7 +27,8 @@ public class UserDBInitializer implements ApplicationRunner {
         "CREATE_USER",
         "READ_USER",
         "UPDATE_USER",
-        "DELETE_USER"
+        "DELETE_USER",
+        "LOGIN"
     };
 
     private final AdminProperties adminProperties;
@@ -101,61 +104,62 @@ public class UserDBInitializer implements ApplicationRunner {
 
         // create system user if not exists
         String systemUserName = "SYSTEM";
-        User systemUser = userService.getUserByUsername(systemUserName);
-
-        if (systemUser == null) {
-            systemUser = userService.addNewUser(
-                User.builder()
-                    .username(systemUserName)
-                    .email("")
-                    .loginEnabled(false)
-                    .build()
+        User systemUser;
+        try {
+            systemUser = userService.getUserByUsername(systemUserName);
+            logger.info(
+                "System user '%s' (id %d) already exists",
+                systemUser.getUsername(), systemUser.getId()
             );
-            if (systemUser == null) {
+        }
+        catch (UserNotFoundException e) {
+            try {
+                systemUser = userService.addNewUser(
+                    User.builder()
+                        .username(systemUserName)
+                        .email("")
+                        .build()
+                );
+
+                logger.debug(
+                    "Successfully created user '%s' with id %d",
+                    systemUser.getUsername(), systemUser.getId()
+                );
+            }
+            catch (UserAlreadyExists _e) {
                 logger.error(String.format("Failed to create user '%s'", systemUserName));
                 throw new Exception("Failed to create system user");
             }
-            else {
-                logger.debug(String.format(
-                    "Successfully created user '%s' with id %d",
-                    systemUser.getUsername(), systemUser.getId()
-                ));
-            }
-        }
-        else {
-            logger.info(String.format(
-                "System user '%s' (id %d) already exists",
-                systemUser.getUsername(), systemUser.getId()
-            ));
         }
 
         // create admin user
-        User admin = userService.getUserByUsername(adminProperties.getUsername());
-        if (admin == null) {
-            admin = User.builder()
-                .username(adminProperties.getUsername())
-                .email(adminProperties.getEmail())
-                .password(adminProperties.getPassword())
-                .permissions(permissionService.getAllPermissions()
-                    .stream().collect(Collectors.toSet()))
-                .createdBy(systemUser)
-                .build();
+        User admin;
+        try {
+            admin = userService.getUserByUsername(adminProperties.getUsername());
+            logger.info("The admin user already exists.");
+        }
+        catch (UserNotFoundException e) {
+            try {
+                admin = userService.addNewUser(User.builder()
+                    .username(adminProperties.getUsername())
+                    .email(adminProperties.getEmail())
+                    .password(adminProperties.getPassword())
+                    .permissions(permissionService.getAllPermissions()
+                        .stream().collect(Collectors.toSet()))
+                    .createdBy(systemUser)
+                    .build()
+                );
 
-            admin = userService.addNewUser(admin);
-            if (admin == null) {
+                logger.debug(
+                    "Successfully created super admin user '%s'", admin.getUsername()
+                );
+            }
+            catch (UserAlreadyExists _e) {
                 logger.warn(String.format(
                     "Failed to create user '%s'", adminProperties.getUsername()
                 ));
                 logger.info("You may need to create the user by hand.");
             }
-            else {
-                logger.debug(String.format(
-                    "Successfully created super admin user '%s'", admin.getUsername()
-                ));
-            }
-        }
-        else {
-            logger.info("The admin user already exists.");
         }
     }
 }

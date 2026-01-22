@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import de.thb.ea.public_transport_tracker.entity.User;
+import de.thb.ea.public_transport_tracker.service.exception.UserNotFoundException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -64,8 +65,9 @@ public class JwtService {
      * 
      * @param user The user to generate the token for.
      * @return The refresh token for the user. If something went wrong it returns null.
+     * @throws UserNotFoundException
      */
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user) throws UserNotFoundException {
         final Date now = new Date();
         final Date expiration = new Date(now.getTime() + jwtRefreshExpiration);
 
@@ -77,7 +79,7 @@ public class JwtService {
             logger.warn(String.format(
                 "Failed to update user (id: %d) with new refresh version.", user.getId()
             ));
-            return null;
+            throw e;
         }
 
         HashMap<String, Object> claims = new HashMap<>();
