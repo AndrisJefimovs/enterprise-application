@@ -27,6 +27,7 @@ export class EditUserComponent implements OnInit {
     public error?: string;
     public showPasswordFields: boolean = false;
     public allPermissions: string[] = [];
+    public permissionsWithoutLogin: string[] = [];
 
     private passwordMatchValidator: ValidatorFn = fieldsEqual('password', 'passwordConfirm');
 
@@ -70,7 +71,7 @@ export class EditUserComponent implements OnInit {
 
     private buildPermissionsArray(): FormArray {
         return this.fb.array(
-            this.allPermissions.filter(p => p !== "LOGIN").map(permission => {
+            this.permissionsWithoutLogin.map(permission => {
                 const control = this.fb.control(
                     this.user.permissions?.includes(permission)
                 );
@@ -84,14 +85,18 @@ export class EditUserComponent implements OnInit {
         );
     }
 
+
     public initForm(): void {
-        // add all permissions the user and the user that is being edited have
-        this.allPermissions = this.authService.permissions.slice(); // clone array 
+        this.allPermissions = this.authService.permissions.slice();
+
         for (const permission of this.user.permissions ?? []) {
             if (!this.allPermissions.includes(permission)) {
                 this.allPermissions.push(permission);
             }
         }
+
+        this.permissionsWithoutLogin =
+            this.allPermissions.filter(p => p !== 'LOGIN');
 
         this.form = this.fb.group({
             username: [this.user.username, [Validators.required, Validators.maxLength(24)]],
@@ -102,7 +107,6 @@ export class EditUserComponent implements OnInit {
             loginEnabled: this.fb.control(this.user.permissions?.includes("LOGIN") ?? false)
         });
 
-        // password fields are initially disabled
         this.form.get('password')?.disable();
         this.form.get('passwordConfirm')?.disable();
     }

@@ -22,7 +22,7 @@
                         <span>
                             @for (permission of user.permissions; track permission) {
                                 @if (permission !== "LOGIN") {
-                                    <span>{{ permission.replace("_", " ").toLowerCase() }}</span>
+                                    <span>{{ permission.replace("_", " ") }}</span>
                                     <br>
                                 }
                             }

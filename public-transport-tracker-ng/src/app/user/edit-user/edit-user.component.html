@@ -57,20 +57,18 @@
                     Passwort doch nicht ändern
                 </a>
             }
-            @if (allPermissions.length > 0) {
+            @if (allPermissions.length > 1 || !allPermissions.includes("LOGIN")) {
                 <div class="permissions-wrapper">
                     <span>Berechtigungen</span>
 
                     <ul formArrayName="permissions" class="permissions">
-                        @for (perm of allPermissions; track $index; let i = $index) {
-                            @if (perm !== "LOGIN") {
-                                <li>
-                                    <label class="permission-item">
-                                        <input type="checkbox" [formControlName]="i">
-                                        <span>{{ perm }}</span>
-                                    </label>
-                                </li>
-                            }
+                        @for (perm of permissionsWithoutLogin; track $index; let i = $index) {
+                            <li>
+                                <label class="permission-item">
+                                    <input type="checkbox" [formControlName]="i">
+                                    <span>{{ perm }}</span>
+                                </label>
+                            </li>
                         }
                     </ul>
                 </div>
