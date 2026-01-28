@@ -26,8 +26,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     /**
-     * For some reason the filter is being executed a after the request is being computed.
-     * This function prevents the filter from filtering when i dont expect a authorization token.
+     * For some reason the filter is being executed after the request is being computed.
+     * This function prevents the filter from filtering when I dont expect a authorization token.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
